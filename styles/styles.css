@@ -1,0 +1,168 @@
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  list-style: none;
+  text-decoration: none;
+  outline: none;
+}
+
+.container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background-color: #020c0d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container .img0 {
+  width: 250px;
+  height: 250px;
+  position: absolute;
+  left: 250px;
+  transform: rotate(30deg);
+}
+
+.container .img1 {
+  width: 250px;
+  height: 250px;
+  position: absolute;
+  right: 250px;
+  transform: rotate(-30deg);
+}
+
+.container form {
+  width: 250px;
+  height: 500px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid lightgreen;
+  border-radius: 10px;
+  flex-direction: column;
+}
+
+.container .box {
+  font-size: x-large;
+  color: lightgreen;
+  width: 100%;
+  height: 10%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container form {
+  color: lightgreen;
+  gap: 15px;
+}
+
+.container form input {
+  width: 200px;
+  height: 35px;
+  padding-left: 20px;
+  border-radius: 16px;
+  border: 1px solid lightgreen;
+  background-color: transparent;
+  color: lightgreen;
+  position: relative;
+}
+
+.container form .buttons {
+  width: 100%;
+  height: 15%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 5px;
+  position: relative;
+  top: 50px;
+}
+
+.container form .buttons .signupBtn,
+.loginBtn {
+  width: 200px;
+  height: 50px;
+  border: 1px solid lightgreen;
+  background-color: transparent;
+  border-radius: 15px;
+  color: lightgreen;
+  transition: all 0.2s linear;
+  position: relative;
+  bottom: 25px;
+}
+
+.container form .buttons .signupBtn:hover,
+.loginBtn:hover {
+  background-color: green;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.container form .buttons .loginLink {
+  color: grey;
+  position: relative;
+  bottom: 15px;
+}
+
+.container .success-alert {
+  width: 350px;
+  height: 70px;
+
+  display: none;
+  align-items: center;
+  justify-content: space-between;
+  
+  padding-left: 20px;
+  padding-right: 20px;
+  
+  background-color: green;
+  border-radius: 10px;
+  
+  color: #fff;
+  background: rgba(65, 117, 5, 0.25);
+  box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+
+  position: absolute;
+  right: -80px;
+  top: 20px;
+
+  -webkit-animation: slide-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+  animation: slide-left 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+}
+
+@-webkit-keyframes slide-left {
+  0% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+  100% {
+    -webkit-transform: translateX(-100px);
+    transform: translateX(-100px);
+  }
+}
+@keyframes slide-left {
+  0% {
+    -webkit-transform: translateX(0);
+    transform: translateX(0);
+  }
+  100% {
+    -webkit-transform: translateX(-100px);
+    transform: translateX(-100px);
+  }
+}
+
+
+.container .success-alert .x-btn {
+  font-size: larger;
+  cursor: pointer;
+}

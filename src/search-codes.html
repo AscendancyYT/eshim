@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Eshim Miner</title>
+    <link rel="stylesheet" href="../styles/search.css">
+    <link rel="icon" href="../styles/Images/logo.jpg">
+  </head>
+  <body>
+    <h2>🟩 Eshim Miner</h2>
+    <button id="searchBtn" onclick="searchCodes()">Start mining</button>
+    <button id="stopBtn" onclick="stopMining()">Stop Mining</button>
+    <a href="../src/profile.html">Go back to Profile</a>
+
+    <div class="section">
+      <strong>🕵️ Checking Log:</strong>
+      <div id="checkingLog">
+        <div id="log"></div>
+        <div id="log2"></div>
+        <div id="log3"></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <strong>✅ Found Match:</strong>
+      <div id="foundList" class="found"></div>
+    </div>
+    <script src="../functions/search.js"></script>
+  </body>
+</html>

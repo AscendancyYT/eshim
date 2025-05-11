@@ -1,3 +1,11 @@
+// main check
+
+if (localStorage.getItem("goodTG") == true) {
+  window.location.href = "../src/profile.html";
+} else {
+  console.log("REGISTER FIRST");
+}
+
 // DOM elements
 let nameInput = document.querySelector(".nameInput");
 let passwordInput = document.querySelector(".passwordInput");
@@ -58,8 +66,10 @@ loginLink.addEventListener("click", function (e) {
           return;
         }
 
-        successAlert.style.display = "flex";
+        window.location.href = "../src/profile.html";
+    localStorage.setItem("telegram", telegramInput.value);
 
+        localStorage.setItem("goodTG", true);
         console.log("Logged in:", user);
       } catch (error) {
         console.log("Login error:", error);
@@ -96,7 +106,10 @@ form.addEventListener("submit", async function (e) {
       telegram: telegramInput.value.trim(),
     });
 
+    window.location.href = "../src/profile.html"
     successAlert.style.display = "flex";
+    localStorage.setItem("telegram", telegramInput.value);
+    localStorage.setItem("goodTG", true);
     form.reset();
   } catch (error) {
     console.log("Error", error);
@@ -105,5 +118,5 @@ form.addEventListener("submit", async function (e) {
 });
 
 xBtn.onclick = () => {
-  successAlert.style.display = "none"
+  successAlert.style.display = "none";
 };

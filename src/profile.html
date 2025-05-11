@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <link rel="stylesheet" href="../styles/profile.css">
+  <link rel="icon" href="../styles/Images/logo.jpg">
+  <title>User Profile</title>
+</head>
+<body>
+  <div class="profile-container">
+    <div class="profile-header">
+      <div class="profile-avatar" id="avatar">E</div>
+      <h1 id="profile-name">Loading...</h1>
+    </div>
+    <div class="profile-info">
+      <p><span class="label">Telegram:</span> <span class="value" id="telegram"></span></p>
+      <p><span class="label">Account ID:</span> <span class="value" id="accID"></span></p>
+      <p><span class="label">Balance:</span> <span class="value" id="balance"></span> <img class="icon-nobg" src="../styles/Images/icon-nobg.png" alt=""></p>
+      <p><span class="label">Status:</span> <span class="value" id="status"></span></p>
+    </div>
+
+    <div class="action-buttons">
+      <button onclick="buyEshim()">Buy</button>
+      <button onclick="mineEshim()">Mine</button>
+    </div>
+    <button class="transaction-button" onclick="makeTransaction()">Make a Transaction</button>
+  </div>
+
+  <script>
+    async function fetchUserByTelegram() {
+      const telegramHandle = localStorage.getItem("telegram");
+
+      if (!telegramHandle) {
+        alert("No Telegram handle found in localStorage.");
+        return;
+      }
+
+      try {
+        const url = `https://67c8964c0acf98d07087272b.mockapi.io/users?telegram=${encodeURIComponent(telegramHandle)}`;
+        const res = await fetch(url);
+        const users = await res.json();
+
+        if (users.length === 0) {
+          alert("No user found with this Telegram handle.");
+          return;
+        }
+
+        const user = users[0];
+
+        document.getElementById('profile-name').innerText = user.name;
+        document.getElementById('telegram').innerText = user.telegram;
+        document.getElementById('accID').innerText = user.accID;
+        document.getElementById('balance').innerText = user.eBalance;
+        document.getElementById('status').innerText = user.status;
+        document.getElementById('avatar').innerText = user.name.charAt(0).toUpperCase();
+
+      } catch (error) {
+        console.error("Failed to fetch user:", error);
+        alert("Error loading user data.");
+      }
+    }
+
+    function buyEshim() {
+      alert("Buy function coming soon.");
+    }
+
+    function mineEshim() {
+      window.location.href = "./search-codes.html"
+    }
+
+    function makeTransaction() {
+      alert("Redirecting to transaction page (placeholder).");
+    }
+
+    window.onload = fetchUserByTelegram;
+  </script>
+</body>
+</html>

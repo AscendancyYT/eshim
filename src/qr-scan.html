@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>QR Code Scanner</title>
+    <link rel="stylesheet" href="../styles/qr-scan.css" />
+    <link rel="icon" href="../styles/Images/logo.jpg" />
+  </head>
+  <body>
+    <h1>QR Code Scanner</h1>
+
+    <div
+      style="
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+      "
+    >
+      <video id="qr-video" autoplay></video>
+      <button id="start-camera">Start Camera</button>
+      <button id="stop-camera" hidden>Stop Camera</button>
+    </div>
+
+    <script type="module">
+      import QrScanner from "https://unpkg.com/qr-scanner@1.4.2/qr-scanner.min.js";
+
+      const video = document.getElementById("qr-video");
+      const result = document.getElementById("result");
+      const fileInput = document.getElementById("file-input");
+      const startCameraBtn = document.getElementById("start-camera");
+      const stopCameraBtn = document.getElementById("stop-camera");
+
+      let qrScanner;
+
+      function displayResult(text) {
+        window.location.href = text;
+      }
+
+      // Start Camera & Scanner
+      startCameraBtn.addEventListener("click", async () => {
+        qrScanner = new QrScanner(video, (decodedText) => {
+          displayResult(decodedText);
+        });
+
+        await qrScanner.start();
+        video.hidden = false;
+        startCameraBtn.hidden = true;
+        stopCameraBtn.hidden = false;
+      });
+
+      // Stop Camera & Scanner
+      stopCameraBtn.addEventListener("click", () => {
+        qrScanner.stop();
+        video.hidden = true;
+        startCameraBtn.hidden = false;
+        stopCameraBtn.hidden = true;
+      });
+    </script>
+  </body>
+</html>

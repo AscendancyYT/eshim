@@ -11,21 +11,18 @@ const BOT_TOKEN = "7213789475:AAEmE6PldmI0tfVkM1oZ--Ef4HcpvBewIk8";
 const CHAT_ID = "-4754251527";
 const characters = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
 
-// 🔥 ID Generator
 function idGenerator(length) {
   return Array.from({ length }, () =>
     characters.charAt(Math.floor(Math.random() * characters.length))
   ).join("");
 }
 
-// 👤 Get current user ID
 async function getUserId() {
   const userResponse = await axios.get(`${USERS_API_BASE}?telegram=${TELEGRAM}`);
   const user = userResponse.data[0];
   return user?.accID;
 }
 
-// 💰 Get balance
 async function getBalance() {
   const userResponse = await axios.get(`${USERS_API_BASE}?telegram=${TELEGRAM}`);
   const user = userResponse.data[0];
@@ -33,7 +30,6 @@ async function getBalance() {
   balance.innerHTML += user.eBalance;
 }
 
-// 🎨 Render withdraws
 function renderWithdraws(withdraws) {
   withdrawList.innerHTML = "";
   withdraws.forEach((w) => {
@@ -45,12 +41,11 @@ function renderWithdraws(withdraws) {
       <span class="wStatus">${w.status}</span>
     `;
 
-    // 💅 Style depending on status
     if (w.status === "pending") {
-      li.style.background = "#ffe066"; // yellowish for pending
+      li.style.background = "#ffe066";
       li.style.borderLeft = "5px solid orange";
     } else {
-      li.style.background = "#00ff9c"; // mint green
+      li.style.background = "#00ff9c";
       li.style.borderLeft = "5px solid #00cc7a";
       li.style.cursor = "pointer";
       li.onclick = () => {
@@ -87,7 +82,6 @@ async function removeWithdraw(wId) {
   }
 }
 
-// 🎯 Form submit
 document.querySelector(".form").addEventListener("submit", async function (e) {
   e.preventDefault();
   submitBtn.disabled = true;
@@ -148,7 +142,6 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
   resetButton();
 });
 
-// 🧼 Reset button
 function resetButton() {
   btnText.textContent = "Submit";
   spinner.style.display = "none";
@@ -156,7 +149,6 @@ function resetButton() {
   submitBtn.style.background = "lightgreen";
 }
 
-// 🔄 Real-time checker (every 10 secs)
 setInterval(async () => {
   try {
     const response = await axios.get(`${WITHD_API}?by=${await getUserId()}`);

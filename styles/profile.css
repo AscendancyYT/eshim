@@ -82,7 +82,7 @@ body {
   color: #0d1110;
 }
 
-.transaction-button {
+.transaction-button, .withdraw {
   margin-top: 1rem;
   width: 100%;
   padding: 0.75rem;
@@ -94,9 +94,12 @@ body {
   border-radius: 6px;
   cursor: pointer;
   transition: all 0.3s ease;
+  text-decoration: none;
+  display: flex;
+  justify-content: center;
 }
 
-.transaction-button:hover {
+.transaction-button:hover, .withdraw:hover {
   background-color: #00ff9c;
   color: #0d1110;
 }

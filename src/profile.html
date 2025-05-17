@@ -25,6 +25,7 @@
       <button onclick="mineEshim()">Mine</button>
     </div>
     <button class="transaction-button" onclick="makeTransaction()">Make a Transaction</button>
+    <button class="withdraw" onclick="makeWithdraw()">Withdraw</button>
   </div>
 
   <script>
@@ -67,6 +68,10 @@
 
     function mineEshim() {
       window.location.href = "./search-codes.html"
+    }
+
+    function makeWithdraw(){
+      window.location.href = "./wApply.html"
     }
 
     function makeTransaction() {

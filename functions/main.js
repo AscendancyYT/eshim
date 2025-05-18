@@ -15,7 +15,7 @@ if (localStorage.getItem("telegram")) {
   let successAlert = document.querySelector(".success-alert");
 
   // Constants
-  const DB_API = "https://67c8964c0acf98d07087272b.mockapi.io/users";
+  const DB_API = "CONFIG.USERS_API";
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567891234567890";
 
   // Generate account ID

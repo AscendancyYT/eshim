@@ -5,10 +5,10 @@ const spinner = submitBtn.querySelector(".spinner");
 const withdrawList = document.querySelector(".withdraws");
 
 const WITHD_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
-const USERS_API_BASE = "https://67c8964c0acf98d07087272b.mockapi.io/users";
+const USERS_API_BASE = CONFIG.USERS_API;
 const TELEGRAM = localStorage.getItem("telegram");
-const BOT_TOKEN = "7213789475:AAEmE6PldmI0tfVkM1oZ--Ef4HcpvBewIk8";
-const CHAT_ID = "-4754251527";
+const BOT_TOKEN = CONFIG.ADMIN_BOT_TOKEN;
+const CHAT_ID = CONFIG.ADMIN_CHAT_ID;
 const characters = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
 
 function idGenerator(length) {

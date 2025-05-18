@@ -1,5 +1,5 @@
 if (localStorage.getItem("telegram")) {
-  const USERS_API = "https://67c8964c0acf98d07087272b.mockapi.io/users";
+  const USERS_API = CONFIG.USERS_API;
   const TELEGRAM = localStorage.getItem("telegram");
 
   let recipient = null;
@@ -11,7 +11,7 @@ if (localStorage.getItem("telegram")) {
   
   let currentInputValue = "";
   
-  async function findRecipient() {
+  window.findRecipient = async function() {
     const id = document.getElementById("recipientId").value.trim();
     const sendBtn = document.getElementById("sendBtn");
     const display = document.getElementById("recipientNameDisplay");
@@ -31,7 +31,6 @@ if (localStorage.getItem("telegram")) {
     try {
       const res = await axios.get(`${USERS_API}?accID=${id}`);
       
-      // Check AGAIN that it's exact match and input didn’t change mid-request
       if (currentInputValue !== id) return;
       
       if (res.data.length === 1 && res.data[0].accID === id) {
@@ -47,7 +46,7 @@ if (localStorage.getItem("telegram")) {
     }
   }
 
-  async function sendTransaction() {
+  window.sendTransaction = async function() {
     const amount = parseFloat(document.getElementById("amount").value);
     const msgEl = document.getElementById("msg");
     
@@ -87,7 +86,8 @@ if (localStorage.getItem("telegram")) {
       "Recipient: None";
       document.getElementById("sendBtn").disabled = true;
       recipient = null;
-    } catch (err) {
+    }
+    catch (err) {
       console.error(err);
       msgEl.textContent = "❌ Transaction failed.";
     }

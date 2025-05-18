@@ -1,5 +1,5 @@
 // APIS
-const USER_API = "https://67c8964c0acf98d07087272b.mockapi.io/users";
+const USER_API = CONFIG.USERS_API;
 const OCOINS_API = "https://67c8964c0acf98d07087272b.mockapi.io/oCoins";
 const NCOINS_API = "https://67c8964c0acf98d07087272b.mockapi.io/nCoins";
 const TRANSACTIONS_API =

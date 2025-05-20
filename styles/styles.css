@@ -166,3 +166,10 @@
   font-size: larger;
   cursor: pointer;
 }
+
+
+@media screen and (max-width: 1345px) {
+  img{
+    display: none;
+  }
+}

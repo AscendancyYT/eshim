@@ -1,75 +1,85 @@
-body {
-  font-family: monospace;
-  background-color: #0d1110;
-  padding: 20px;
-  color: #0f0;
+* {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+  list-style: none;
+  text-decoration: dashed;
+  outline: none;
 }
-.section {
-  margin-top: 20px;
-  white-space: pre-wrap;
-  max-height: 400px;
-  overflow-y: auto;
-  border: 1px solid #0f0;
-  padding: 10px;
-  background: #000;
+
+.container {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  overflow-x: hidden;
+  background-color: #0f1615;
 }
-.highlight {
-  color: #ff0;
-}
-.found {
-  color: #0f0;
+
+.container .displayBalance {
+  width: 100%;
+  height: 10%;
   display: flex;
-  align-items: start;
-  justify-content: start;
-  flex-direction: column;
-  gap: 20px;
-  flex-wrap: wrap;
-}
-::-webkit-scrollbar {
-  width: 7px;
-}
-::-webkit-scrollbar-track {
-  box-shadow: inset 0 0 5px grey;
-  border-radius: 10px;
-}
-::-webkit-scrollbar-thumb {
-  background: gray;
-  border-radius: 10px;
-}
-#checkingLog {
-  display: flex;
-  gap: 10px;
-}
-#checkingLog > div {
-  flex: 1;
-  max-height: 280px;
-  overflow-y: auto;
-  border: 1px dashed #0f0;
-  padding: 5px;
-}
-
-button{
-  width: 200px;
-  height: 50px;
-  border-radius: 10px;
-  border: 1px solid lightgreen;
-  background-color: transparent;
-  color: lightgreen;
-  transition: all .2s linear;
-  cursor: pointer;
-}
-
-button:hover{
-  background-color: green;
-  color: #fff;
-  border: none;
-}
-
-a{
-  width: 200px;
-  height: 50px;
   align-items: center;
   justify-content: center;
-  text-decoration: none;
-  color: lightgreen;
+  color: #00ff9c;
+}
+
+.container .circle {
+  width: 100%;
+  height: 80%;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.container .circle .button {
+  width: 500px;
+  height: 500px;
+
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  cursor: pointer;
+  font-weight: 900;
+  font-size: xx-large;
+
+  background-color: #00ff9c;
+  box-shadow: 0 0 20px #00ff9c33;
+  color: #0f1615;
+
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+.floating-text {
+  position: absolute;
+  z-index: 9999;
+  font-size: 30px;
+  font-weight: bold;
+  color: white;
+  pointer-events: none;
+  animation: floatUp 1s ease-out forwards;
+  transform: translate(-50%, -50%);
+}
+
+.floating-text.crit {
+  color: gold;
+  font-size: 26px;
+  text-shadow: 0 0 10px yellow;
+}
+
+@keyframes floatUp {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-50%, -150%) scale(1.5);
+  }
 }

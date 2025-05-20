@@ -7,24 +7,15 @@
     <link rel="icon" href="../styles/Images/logo.jpg">
   </head>
   <body>
-    <h2>🟩 Eshim Miner</h2>
-    <button id="searchBtn">Start mining</button>
-    <button id="stopBtn">Stop Mining</button>
-    <a href="../src/profile.html">Go back to Profile</a>
-
-    <div class="section">
-      <strong>🕵️ Checking Log:</strong>
-      <div id="checkingLog">
-        <div id="log"></div>
-        <div id="log2"></div>
-        <div id="log3"></div>
+    <div class="container">
+      <h1 class="displayBalance">
+        Your Balance:
+      </h1>
+      <div class="circle">
+        <div class="button">TAP!</div>
       </div>
     </div>
-
-    <div class="section">
-      <strong>✅ Found Match:</strong>
-      <div id="foundList" class="found"></div>
-    </div>
+    <script src="../config.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>  
     <script src="../functions/search.js"></script>
   </body>

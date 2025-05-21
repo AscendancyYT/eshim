@@ -140,7 +140,7 @@ body {
   color: #00ff9c;
 }
 
-@media screen and (max-width: 1000px) {
+/* @media screen and (max-width: 1000px) {
   .container .con {
     display: flex;
     align-items: center;
@@ -196,4 +196,4 @@ body {
   .container{
     padding-top: 60%;
   }
-}
+} */

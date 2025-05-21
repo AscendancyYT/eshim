@@ -136,7 +136,7 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
     amntInp.value = "";
   } catch (err) {
     console.error(err.message);
-    alert("Withdraw failed: " + err.message);
+    alert("Withdraw failed: " + err);
   }
 
   resetButton();

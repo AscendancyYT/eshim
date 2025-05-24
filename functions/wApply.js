@@ -1,4 +1,3 @@
-// === DOM Selectors ===
 const submitBtn = document.querySelector(".submitBtn");
 const amntInp = document.querySelector(".amntInp");
 const btnText = submitBtn.querySelector(".btnText");
@@ -6,14 +5,12 @@ const spinner = submitBtn.querySelector(".spinner");
 const withdrawList = document.querySelector(".withdraws");
 const balanceDisplay = document.querySelector(".balance");
 
-// === Constants ===
 const WITHD_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
 const USERS_API_BASE = CONFIG.USERS_API;
 const BOT_TOKEN = CONFIG.ADMIN_BOT_TOKEN;
 const CHAT_ID = CONFIG.ADMIN_CHAT_ID;
 const characters = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
 
-// === Local Storage Fetch ===
 let TELEGRAM = "";
 try {
   TELEGRAM = localStorage.getItem("telegram") || "";
@@ -139,7 +136,6 @@ async function removeWithdraw(wId) {
   }
 }
 
-// === Submit Handler ===
 document.querySelector(".form").addEventListener("submit", async function (e) {
   e.preventDefault();
 
@@ -210,7 +206,6 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
   }
 });
 
-// === Reset Button ===
 function resetButton() {
   btnText.textContent = "Submit";
   spinner.style.display = "none";
@@ -218,7 +213,6 @@ function resetButton() {
   submitBtn.style.background = "lightgreen";
 }
 
-// === Live Updates ===
 async function updateWithdraws() {
   try {
     const userId = await getUserId();
@@ -242,7 +236,6 @@ async function updateWithdraws() {
   }
 }
 
-// === Initialization ===
 (async () => {
   try {
     await getBalance();

@@ -18,7 +18,6 @@ if (localStorage.getItem("telegram")) {
   const DB_API = CONFIG.USERS_API;
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567891234567890";
 
-  // Generate account ID
   function generateID(length) {
     let id = "";
     for (let i = 0; i < length; i++) {
@@ -27,11 +26,9 @@ if (localStorage.getItem("telegram")) {
     return id;
   }
 
-  // Mode switch: Signup ➝ Login
   loginLink.addEventListener("click", function (e) {
     e.preventDefault();
 
-    // Remove name input and signup button
     nameInput.style.display = "none";
     signupBtn.remove();
     loginLink.remove();

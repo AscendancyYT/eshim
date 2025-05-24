@@ -1,3 +1,4 @@
+// === DOM Selectors ===
 const submitBtn = document.querySelector(".submitBtn");
 const amntInp = document.querySelector(".amntInp");
 const btnText = submitBtn.querySelector(".btnText");
@@ -5,12 +6,14 @@ const spinner = submitBtn.querySelector(".spinner");
 const withdrawList = document.querySelector(".withdraws");
 const balanceDisplay = document.querySelector(".balance");
 
+// === Constants ===
 const WITHD_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
 const USERS_API_BASE = CONFIG.USERS_API;
 const BOT_TOKEN = CONFIG.ADMIN_BOT_TOKEN;
 const CHAT_ID = CONFIG.ADMIN_CHAT_ID;
 const characters = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
 
+// === Local Storage Fetch ===
 let TELEGRAM = "";
 try {
   TELEGRAM = localStorage.getItem("telegram") || "";
@@ -18,7 +21,7 @@ try {
   console.error("LocalStorage access error:", e);
 }
 
-
+// === Axios Global Interceptor ===
 axios.interceptors.response.use(
   (response) => {
     console.log("Response:", response.status, response.config.url);
@@ -35,7 +38,7 @@ axios.interceptors.response.use(
   }
 );
 
-// Helper functions
+// === Helper Functions ===
 function idGenerator(length) {
   return Array.from({ length }, () =>
     characters.charAt(Math.floor(Math.random() * characters.length))
@@ -132,43 +135,45 @@ async function removeWithdraw(wId) {
     renderWithdraws(withdraws);
   } catch (err) {
     console.error("Failed to delete withdraw:", err);
-    alert("Failed to remove. Please try again.");
+    console.log("Failed to remove. Please try again.");
   }
 }
 
-// Form submission handler
+// === Submit Handler ===
 document.querySelector(".form").addEventListener("submit", async function (e) {
   e.preventDefault();
 
-  // UI state update
   submitBtn.disabled = true;
   btnText.textContent = "Processing...";
   spinner.style.display = "inline-block";
   submitBtn.style.background = "none";
 
   try {
-    // Validate input
     const amount = parseFloat(amntInp.value);
     if (isNaN(amount) || amount <= 0) {
       throw new Error("Please enter a valid amount");
     }
 
-    // Get user data
-    const userResponse = await axios.get(
-      `${USERS_API_BASE}?telegram=${TELEGRAM}`
-    );
+    const userResponse = await axios.get(`${USERS_API_BASE}?telegram=${TELEGRAM}`);
     const user = userResponse.data[0];
     if (!user) throw new Error("User account not found");
 
-    // Check balance
     const balance = parseFloat(user.eBalance);
-    if (amount > balance) {
-      throw new Error("Insufficient balance");
+    if (amount > balance) throw new Error("Insufficient balance");
+
+    let existing = [];
+    try {
+      const res = await axios.get(`${WITHD_API}?by=${user.accID}`);
+      existing = Array.isArray(res.data) ? res.data : [];
+    } catch (err) {
+      if (err.response?.status !== 404) throw err;
     }
 
-    let existing = await axios.get(`${WITHD_API}?by=${user.accID}`);
+    const activeWithdraws = existing.filter((w) => w.status === "pending");
+    if (activeWithdraws.length >= 3) {
+      throw new Error("Maximum 3 pending withdraws allowed");
+    }
 
-    // Create withdraw
     const withdrawal = {
       wId: idGenerator(7),
       amount,
@@ -179,50 +184,33 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
 
     const { data: newWithdraw } = await axios.post(WITHD_API, withdrawal);
 
-    // Update balance
     await axios.put(`${USERS_API_BASE}/${user.id}`, {
       eBalance: balance - amount,
     });
 
-    // Notify admin
     try {
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: CHAT_ID,
         parse_mode: "HTML",
-        text: `<b>New Withdraw Request</b>\n<b>User: </b> ${
-          user.name
-        }\n<b>Date: </b> ${new Date().toLocaleDateString()}\n<b>Amount: </b> ${amount}`,
+        text: `<b>New Withdraw Request</b>\n<b>User: </b> ${user.name}\n<b>Date: </b> ${new Date().toLocaleDateString()}\n<b>Amount: </b> ${amount}`,
       });
     } catch (tgError) {
-      alert(err.tgError);
+      console.warn("Telegram notification failed:", tgError.message);
     }
 
-    // Update local storage
-    const updatedWithdraws = [...existing.data, newWithdraw];
+    const updatedWithdraws = [...existing, newWithdraw];
     localStorage.setItem("myWithdraws", JSON.stringify(updatedWithdraws));
     renderWithdraws(updatedWithdraws);
     amntInp.value = "";
-    // Check existing withdraws
-
-    if (await axios.get(`${WITHD_API}?by=${user.accID}`)) {
-      const activeWithdraws = existing.data.filter(
-        (w) => w.status === "pending"
-      );
-
-      if (activeWithdraws.length >= 3) {
-        throw new Error("Maximum 3 pending withdraws allowed");
-      }
-    }
-
-    // Refresh balance display
     await getBalance();
   } catch (err) {
-    alert("Withdraw failed: " + (err.response?.data?.message || err.message));
+    console.error("Withdraw failed:", err.message);
   } finally {
     resetButton();
   }
 });
 
+// === Reset Button ===
 function resetButton() {
   btnText.textContent = "Submit";
   spinner.style.display = "none";
@@ -230,40 +218,48 @@ function resetButton() {
   submitBtn.style.background = "lightgreen";
 }
 
-// Live updates
+// === Live Updates ===
 async function updateWithdraws() {
   try {
     const userId = await getUserId();
-    const response = await axios.get(`${WITHD_API}?by=${userId}`);
-    const stored = JSON.stringify(
-      JSON.parse(localStorage.getItem("myWithdraws")) || []
-    );
-    const latest = JSON.stringify(response.data);
+    let latest = [];
+    try {
+      const response = await axios.get(`${WITHD_API}?by=${userId}`);
+      latest = Array.isArray(response.data) ? response.data : [];
+    } catch (err) {
+      if (err.response?.status !== 404) throw err;
+    }
 
-    if (stored !== latest) {
-      localStorage.setItem("myWithdraws", latest);
-      renderWithdraws(response.data);
+    const stored = JSON.stringify(JSON.parse(localStorage.getItem("myWithdraws")) || []);
+    const latestJSON = JSON.stringify(latest);
+
+    if (stored !== latestJSON) {
+      localStorage.setItem("myWithdraws", latestJSON);
+      renderWithdraws(latest);
     }
   } catch (err) {
-    alert(err.message);
+    return err;
   }
 }
 
-// Initialize
+// === Initialization ===
 (async () => {
   try {
     await getBalance();
     const userId = await getUserId();
-    if (userId) {
+    let withdraws = [];
+    try {
       const response = await axios.get(`${WITHD_API}?by=${userId}`);
-      localStorage.setItem("myWithdraws", JSON.stringify(response.data));
-      renderWithdraws(response.data);
+      withdraws = Array.isArray(response.data) ? response.data : [];
+    } catch (err) {
+      if (err.response?.status !== 404) throw err;
     }
+    localStorage.setItem("myWithdraws", JSON.stringify(withdraws));
+    renderWithdraws(withdraws);
   } catch (err) {
     renderWithdraws([]);
-    alert(err);
+    console.log(err);
   }
 
-  // Set up periodic updates
   setInterval(updateWithdraws, 10000);
 })();

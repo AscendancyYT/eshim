@@ -1,0 +1,31 @@
+
+@media (max-width: 361px) and (max-height: 781px){
+  .container{
+    width: 360px;
+    height: 780px;
+  }
+  .container .circle{
+    height: 50%;
+    padding-top: 40%;
+  }
+  .container .circle .button{
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 429px) and (max-height: 927px){
+  .container .circle .button{
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 321px) and (max-height: 569px){
+  .container .circle{
+    padding: 0;
+  }
+}
+/* 
+@media (max-width: 429px) and (max-height: 927px){
+} */

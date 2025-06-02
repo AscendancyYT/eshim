@@ -25,6 +25,7 @@
     </div>
     <button class="transaction-button" onclick="makeTransaction()">Make a Transaction</button>
     <button class="withdraw" onclick="makeWithdraw()">Withdraw</button>
+    <button class="quitBtn" onclick="quit()">Quit</button>
   </div>
 
   <script>
@@ -32,10 +33,9 @@
       const telegramHandle = localStorage.getItem("telegram");
 
       if (!telegramHandle) {
-        alert("No Telegram handle found in localStorage.");
+        window.location.href="../index.html"
         return;
       }
-
       try {
         const url = `https://67c8964c0acf98d07087272b.mockapi.io/users?telegram=${encodeURIComponent(telegramHandle)}`;
         const res = await fetch(url);
@@ -71,6 +71,11 @@
 
     function makeTransaction() {
       window.location.href = "./transactions.html"
+    }
+    
+    function quit(){
+      localStorage.removeItem("telegram");
+      window.location.reload()
     }
 
     window.onload = fetchUserByTelegram;

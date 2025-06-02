@@ -12,6 +12,7 @@ const modalInputs = {
   password: document.getElementById("edit-password"),
   telegram: document.getElementById("edit-telegram"),
   eBalance: document.getElementById("edit-balance"),
+  status: document.getElementById("edit-status")
 };
 
 const USERS_API_BASE = CONFIG.USERS_API;
@@ -75,7 +76,6 @@ function renderAdminWithdraws(withdraws, limit = true) {
   );
 }
 
-// === EVENT HANDLERS ===
 searchUserInput.oninput = () => {
   const query = searchUserInput.value.trim();
   if (!query) return renderUserList(allUsers, true);
@@ -95,6 +95,7 @@ modalForm.addEventListener("submit", async (e) => {
   if (!selectedUserId) return;
 
   const updatedUser = {
+    status: modalInputs.status.value,
     name: modalInputs.name.value,
     password: modalInputs.password.value,
     telegram: modalInputs.telegram.value,
@@ -133,6 +134,7 @@ function openUserModal(user) {
   modalInputs.password.value = user.password || "";
   modalInputs.telegram.value = user.telegram || "";
   modalInputs.eBalance.value = user.eBalance || 0;
+  modalInputs.status.value = user.status || "";
   modal.style.display = "flex";
 }
 

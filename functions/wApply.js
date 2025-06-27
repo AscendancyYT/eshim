@@ -35,7 +35,6 @@ axios.interceptors.response.use(
   }
 );
 
-// === Helper Functions ===
 function idGenerator(length) {
   return Array.from({ length }, () =>
     characters.charAt(Math.floor(Math.random() * characters.length))
@@ -98,7 +97,9 @@ function renderWithdraws(withdraws) {
     if (w.status === "pending") {
       li.style.background = "#ffe066";
       li.style.borderLeft = "5px solid orange";
-    } else {
+    } else if(w.status === "denied"){
+      li.style.background = "red";
+    }else{
       li.style.background = "#00ff9c";
       li.style.borderLeft = "5px solid #00cc7a";
       li.style.cursor = "pointer";

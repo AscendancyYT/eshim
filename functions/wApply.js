@@ -97,11 +97,12 @@ function renderWithdraws(withdraws) {
     if (w.status === "pending") {
       li.style.background = "#ffe066";
       li.style.borderLeft = "5px solid orange";
-    } else if(w.status === "denied"){
+    } else if (w.status === "denied") {
       li.style.background = "red";
-    }else{
+      li.style.cursor = "pointer";
+      li.onclick = () => removeWithdraw(w.wId);
+    } else {
       li.style.background = "#00ff9c";
-      li.style.borderLeft = "5px solid #00cc7a";
       li.style.cursor = "pointer";
       li.onclick = () => removeWithdraw(w.wId);
     }
@@ -151,7 +152,9 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
       throw new Error("Please enter a valid amount");
     }
 
-    const userResponse = await axios.get(`${USERS_API_BASE}?telegram=${TELEGRAM}`);
+    const userResponse = await axios.get(
+      `${USERS_API_BASE}?telegram=${TELEGRAM}`
+    );
     const user = userResponse.data[0];
     if (!user) throw new Error("User account not found");
 
@@ -189,7 +192,9 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
       await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
         chat_id: CHAT_ID,
         parse_mode: "HTML",
-        text: `<b>New Withdraw Request</b>\n<b>User: </b> ${user.name}\n<b>Date: </b> ${new Date().toLocaleDateString()}\n<b>Amount: </b> ${amount}`,
+        text: `<b>New Withdraw Request</b>\n<b>User: </b> ${
+          user.name
+        }\n<b>Date: </b> ${new Date().toLocaleDateString()}\n<b>Amount: </b> ${amount}`,
       });
     } catch (tgError) {
       console.warn("Telegram notification failed:", tgError.message);
@@ -225,7 +230,9 @@ async function updateWithdraws() {
       if (err.response?.status !== 404) throw err;
     }
 
-    const stored = JSON.stringify(JSON.parse(localStorage.getItem("myWithdraws")) || []);
+    const stored = JSON.stringify(
+      JSON.parse(localStorage.getItem("myWithdraws")) || []
+    );
     const latestJSON = JSON.stringify(latest);
 
     if (stored !== latestJSON) {

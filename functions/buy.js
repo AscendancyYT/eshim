@@ -1,5 +1,6 @@
 let accIDInput = document.querySelector(".accIDInput");
 let buyBtn = document.querySelector(".buyBtn")
+let amount = document.querySelector(".amount")
 let userTelegram = localStorage.getItem("telegram");
 
 async function getUsers() {
@@ -19,8 +20,14 @@ async function fillID() {
     });
 }
 
-buyBtn.onclick = (e) => {
+buyBtn.onclick = async (e) => {
   e.preventDefault()
+  await axios.post(`https://67c8964c0acf98d07087272b.mockapi.io/purchaseReq`, {
+    createdAt: new Date().toISOString(),
+    accID: "1",
+    status: "waiting",
+    amount: amount.value
+  })
 }
 
 fillID()

@@ -25,6 +25,7 @@
     </div>
     <button class="transaction-button" onclick="makeTransaction()">Make a Transaction</button>
     <button class="withdraw" onclick="makeWithdraw()">Withdraw</button>
+    <button class="buyBtn" onclick="buy()">Buy</button>
     <button class="quitBtn" onclick="quit()">Quit</button>
   </div>
 
@@ -76,6 +77,10 @@
     function quit(){
       localStorage.removeItem("telegram");
       window.location.reload()
+    }
+
+    function buy(){
+      window.location.href="./buy.html"
     }
 
     window.onload = fetchUserByTelegram;

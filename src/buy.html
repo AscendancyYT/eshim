@@ -1,31 +1,44 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="stylesheet" href="../styles/buy.css">
-  <title>Buy Eshim</title>
-</head>
-<body>
-  <div class="container">
-    <form class="form">
-      <h1 class="box">Buy</h1>
-      <div class="input accauntID">
-        <label>Accaunt ID:</label>
-        <input type="text" class="accIDInput readonly" placeholder="Loading..." readonly>
-      </div>
-      <div class="input amount">
-        <label>Amount Of Eshims:</label>
-        <input type="number" class="amount" placeholder="Amount of Eshims">
-      </div>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../styles/buy.css" />
+    <title>Buy Eshim</title>
+  </head>
+  <body>
+    <div class="container">
+      <form class="form">
+        <h1 class="box">Buy</h1>
+        <div class="input accauntID">
+          <label>Accaunt ID:</label>
+          <input
+            type="text"
+            class="accIDInput readonly"
+            placeholder="Loading..."
+            readonly
+          />
+        </div>
+        <div class="input amount">
+          <label>Amount Of Eshims:</label>
+          <input
+            type="number"
+            class="amountInput"
+            placeholder="Amount of Eshims"
+          />
+        </div>
 
-      <div class="action">
-        <button class="buyBtn">Purchase</button>
-        <a href="./profile.html" class="goBack">Go Back to Profile</a>
+        <div class="action">
+          <button class="buyBtn">Purchase</button>
+          <a href="./profile.html" class="goBack">Go Back to Profile</a>
+        </div>
+      </form>
+      <div class="success-alert">
+        <span> <i class="bx bxs-party"></i> Success! </span>
+        <span class="x-btn">x</span>
       </div>
-    </form>
-  </div>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>  
-  <script src="../functions/buy.js"></script>
-</body>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="../functions/buy.js"></script>
+  </body>
 </html>

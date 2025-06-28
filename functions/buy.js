@@ -4,6 +4,7 @@ let amount = document.querySelector(".amountInput");
 let userTelegram = localStorage.getItem("telegram");
 let xBtn = document.querySelector(".x-btn");
 let successAlert = document.querySelector(".success-alert");
+let priceAmount = document.querySelector(".priceAmount");
 
 const BOT_TOKEN = "7213789475:AAEmE6PldmI0tfVkM1oZ--Ef4HcpvBewIk8";
 const URI_API = `https://api.telegram.org/bot${BOT_TOKEN}/SendMessage`;
@@ -43,8 +44,9 @@ buyBtn.onclick = async (e) => {
         .catch((err) => alert("Error Fetching AccID" + " " + err)),
       status: "waiting",
       amount: amount.value,
+      price: amount.value * 50,
     })
-    .then(async(response) => {
+    .then(async (response) => {
       console.log(response);
 
       let message = `<b>🗒 Purchase Response Log</b> \n`;
@@ -56,8 +58,8 @@ buyBtn.onclick = async (e) => {
         )
         .then((response) => {
           return response.data[0].accID;
-        })}`;
-
+        })}\n`;
+      message += `<b>Price:</b> ${amount.value * 50}`;
       axios
         .post(URI_API, {
           parse_mode: "html",
@@ -76,5 +78,9 @@ buyBtn.onclick = async (e) => {
 xBtn.onclick = () => {
   successAlert.style.display = "none";
 };
+
+function amountOnChange() {
+  priceAmount.innerHTML = amount.value * 50;
+}
 
 fillID();

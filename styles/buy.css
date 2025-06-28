@@ -102,6 +102,11 @@
   letter-spacing: 2px;
 }
 
+.price{
+  font-size: xx-large;
+  color: #fff;
+}
+
 .success-alert {
   width: 350px;
   height: 70px;
@@ -152,7 +157,6 @@
     transform: translateX(-100px);
   }
 }
-
 
 .success-alert .x-btn {
   font-size: larger;

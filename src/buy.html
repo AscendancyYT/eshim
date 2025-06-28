@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="../styles/buy.css" />
+    <link rel="icon" href="../styles/Images/logo.jpg">
     <title>Buy Eshim</title>
   </head>
   <body>
@@ -25,8 +26,11 @@
             type="number"
             class="amountInput"
             placeholder="Amount of Eshims"
+            onchange="amountOnChange()"
           />
         </div>
+
+        <div class="price">Price: <span class="priceAmount"></span><span class="currency"> UZS</span></div>
 
         <div class="action">
           <button class="buyBtn">Purchase</button>

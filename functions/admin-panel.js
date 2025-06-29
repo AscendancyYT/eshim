@@ -1,8 +1,9 @@
 const userList = document.querySelector(".admin-users");
 const adminList = document.querySelector(".admin-withdraws");
-const txList = document.querySelector(".admin-transactions")
+const txList = document.querySelector(".admin-transactions");
 const searchUserInput = document.getElementById("search-user");
 const searchWithdrawInput = document.getElementById("search-withdraw");
+const purchaseList = document.querySelector(".admin-purchases");
 
 const modal = document.querySelector(".modal");
 const modalForm = document.querySelector(".modal-form");
@@ -12,12 +13,13 @@ const modalInputs = {
   password: document.getElementById("edit-password"),
   telegram: document.getElementById("edit-telegram"),
   eBalance: document.getElementById("edit-balance"),
-  status: document.getElementById("edit-status")
+  status: document.getElementById("edit-status"),
 };
 
 const USERS_API_BASE = CONFIG.USERS_API;
 const TRANSACTIONS_API = CONFIG.TRANSACTIONS_API;
 const WITHD_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
+const PURCHASE_API = "https://67c8964c0acf98d07087272b.mockapi.io/purchaseReq";
 
 let allUsers = [];
 let allWithdraws = [];
@@ -26,20 +28,23 @@ let selectedUserId = null;
 function searchSort(list, query, key) {
   const q = query.toLowerCase();
   return list
-    .map(item => ({
+    .map((item) => ({
       item,
-      score: item[key].toLowerCase().startsWith(q) ? 2 :
-             item[key].toLowerCase().includes(q) ? 1 : 0
+      score: item[key].toLowerCase().startsWith(q)
+        ? 2
+        : item[key].toLowerCase().includes(q)
+        ? 1
+        : 0,
     }))
-    .filter(r => r.score > 0)
+    .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score)
-    .map(r => r.item);
+    .map((r) => r.item);
 }
 
 function renderUserList(users, limit = true) {
   userList.innerHTML = "";
   const displayUsers = limit ? users.slice(-15).reverse() : users;
-  displayUsers.forEach(user => {
+  displayUsers.forEach((user) => {
     const li = document.createElement("li");
     li.textContent = user.name;
     li.style.cursor = "pointer";
@@ -52,7 +57,7 @@ function renderAdminWithdraws(withdraws, limit = true) {
   adminList.innerHTML = "";
   const displayWithdraws = limit ? withdraws.slice(-15).reverse() : withdraws;
 
-  displayWithdraws.forEach(w => {
+  displayWithdraws.forEach((w) => {
     const li = document.createElement("li");
     li.innerHTML = `
       <div><b>UserID:</b> ${w.by}</div>
@@ -60,20 +65,28 @@ function renderAdminWithdraws(withdraws, limit = true) {
       <div><b>Status:</b> ${w.status}</div>
       <div><b>Date:</b> ${w.date}</div>
       <div><b>wId:</b> ${w.wId}</div>
-      ${w.status === "pending" ? `
+      ${
+        w.status === "pending"
+          ? `
         <button data-id="${w.id}" class="approve">✅ Approve</button>
         <button data-id="${w.id}" class="deny">❌ Deny</button>
-      ` : ""}
+      `
+          : ""
+      }
     `;
     adminList.appendChild(li);
   });
 
-  document.querySelectorAll(".approve").forEach(btn =>
-    btn.onclick = () => updateWithdraw(btn.dataset.id, "approved")
-  );
-  document.querySelectorAll(".deny").forEach(btn =>
-    btn.onclick = () => updateWithdraw(btn.dataset.id, "denied")
-  );
+  document
+    .querySelectorAll(".approve")
+    .forEach(
+      (btn) => (btn.onclick = () => updateWithdraw(btn.dataset.id, "approved"))
+    );
+  document
+    .querySelectorAll(".deny")
+    .forEach(
+      (btn) => (btn.onclick = () => updateWithdraw(btn.dataset.id, "denied"))
+    );
 }
 
 searchUserInput.oninput = () => {
@@ -169,7 +182,7 @@ function renderTransactions(list) {
     return;
   }
 
-  list.forEach(tx => {
+  list.forEach((tx) => {
     const li = document.createElement("li");
     li.innerHTML = `
       <div><b>ID:</b> ${tx.trId}</div>
@@ -182,8 +195,66 @@ function renderTransactions(list) {
   });
 }
 
+function renderPurchases(purchases) {
+  purchaseList.innerHTML = "";
+  const display = purchases.slice(-15).reverse();
+
+  display.forEach((p) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <div><b>Account:</b> ${p.accID}</div>
+      <div><b>Amount:</b> ${p.amount}</div>
+      <div><b>Price:</b> ${p.price.toLocaleString()} UZS</div>
+      <div><b>Status:</b> ${p.status}</div>
+      <div><b>Date:</b> ${new Date(p.createdAt).toLocaleString()}</div>
+      ${
+        p.status === "waiting"
+          ? `
+        <button class="approve" data-id="${p.id}">✅ Approve</button>
+        <button class="deny" data-id="${p.id}">❌ Deny</button>
+      `
+          : ""
+      }
+    `;
+    purchaseList.appendChild(li);
+  });
+
+  document
+    .querySelectorAll(".purchase-panel .approve")
+    .forEach(
+      (btn) =>
+        (btn.onclick = () => updatePurchaseStatus(btn.dataset.id, "approved"))
+    );
+  document
+    .querySelectorAll(".purchase-panel .deny")
+    .forEach(
+      (btn) =>
+        (btn.onclick = () => updatePurchaseStatus(btn.dataset.id, "denied"))
+    );
+}
+
+async function fetchPurchases() {
+  try {
+    const res = await axios.get(PURCHASE_API);
+    renderPurchases(res.data || []);
+  } catch (err) {
+    console.error("Failed to fetch purchases:", err);
+  }
+}
+
+async function updatePurchaseStatus(id, status) {
+  try {
+    await axios.put(`${PURCHASE_API}/${id}`, { status });
+    await fetchPurchases();
+  } catch (err) {
+    console.error("Failed to update purchase:", err);
+  }
+}
+
+fetchPurchases();
 fetchUsers();
 fetchWithdraws();
 fetchTransactions();
+setInterval(fetchPurchases, 15000);
 setInterval(fetchTransactions, 15000);
 setInterval(fetchWithdraws, 15000);

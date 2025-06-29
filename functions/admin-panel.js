@@ -52,21 +52,22 @@ function renderUserList(users, limit = true) {
     userList.appendChild(li);
   });
 }
-
 function renderAdminWithdraws(withdraws, limit = true) {
   adminList.innerHTML = "";
   const displayWithdraws = limit ? withdraws.slice(-15).reverse() : withdraws;
 
   displayWithdraws.forEach((w) => {
     const li = document.createElement("li");
+
     li.innerHTML = `
       <div><b>UserID:</b> ${w.by}</div>
       <div><b>Amount:</b> ${w.amount}</div>
       <div><b>Status:</b> ${w.status}</div>
-      <div><b>Date:</b> ${w.date}</div>
+      <div><b>Date:</b> ${new Date(w.date).toLocaleString()}</div>
       <div><b>wId:</b> ${w.wId}</div>
       ${
-        w.status === "pending"
+        w.status.toLowerCase() === "waiting" ||
+        w.status.toLowerCase() === "pending"
           ? `
         <button data-id="${w.id}" class="approve">✅ Approve</button>
         <button data-id="${w.id}" class="deny">❌ Deny</button>
@@ -74,6 +75,7 @@ function renderAdminWithdraws(withdraws, limit = true) {
           : ""
       }
     `;
+
     adminList.appendChild(li);
   });
 
@@ -158,11 +160,17 @@ function closeModal() {
 
 async function updateWithdraw(id, status) {
   try {
-    await axios.put(`${WITHD_API}/${id}`, { status });
+    const res = await axios.get(`${WITHD_API}/${id}`);
+    const oldData = res.data;
+    const updated = { ...oldData, status };
+    const updateRes = await axios.put(`${WITHD_API}/${id}`, updated);
+    console.log("Updated:", updateRes.data);
     await fetchWithdraws();
-  } catch (_) {}
+  } catch (err) {
+    console.error("Withdraw update failed:", err);
+    alert("Something went wrong.");
+  }
 }
-
 window.onclick = function (e) {
   if (e.target === modal) closeModal();
 };

@@ -13,35 +13,32 @@
         <h1 class="box">Buy</h1>
         <div class="input accauntID">
           <label>Accaunt ID:</label>
-          <input
-            type="text"
-            class="accIDInput readonly"
-            placeholder="Loading..."
-            readonly
-          />
+          <input type="text" class="accIDInput readonly" placeholder="Loading..." readonly />
         </div>
         <div class="input amount">
           <label>Amount Of Eshims:</label>
-          <input
-            type="number"
-            class="amountInput"
-            placeholder="Amount of Eshims"
-            onchange="amountOnChange()"
-          />
+          <input type="number" class="amountInput" placeholder="Amount of Eshims" onchange="amountOnChange()" />
         </div>
-
         <div class="price">Price: <span class="priceAmount"></span><span class="currency"> UZS</span></div>
-
         <div class="action">
           <button class="buyBtn">Purchase</button>
           <a href="./profile.html" class="goBack">Go Back to Profile</a>
         </div>
       </form>
+
+      <div class="purchase-history">
+        <h2>Your Purchase History</h2>
+        <ul class="history-list">
+          <li>Loading your past purchases...</li>
+        </ul>
+      </div>
+
       <div class="success-alert">
         <span> <i class="bx bxs-party"></i> Success! </span>
         <span class="x-btn">x</span>
       </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
     <script src="../functions/buy.js"></script>
   </body>

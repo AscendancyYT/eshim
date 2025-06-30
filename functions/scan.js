@@ -1,45 +1,52 @@
 const WITHDRAW_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
-const USER_API = "https://67c8964c0acf98d07087272b.mockapi.io/users";
+const USER_API_BASE = "https://67c8964c0acf98d07087272b.mockapi.io/users";
 const resultBox = document.getElementById("result");
 
-async function scanAndUpdate() {
+async function scanAndApply() {
   const params = new URLSearchParams(window.location.search);
-  const idParam = params.get("id");
+  const wIdParam = params.get("id");
+  const telegram = localStorage.getItem("telegram");
 
-  if (!idParam) {
+  if (!wIdParam) {
     resultBox.classList.add("error");
-    resultBox.textContent = "❌ Missing 'id' in query.";
+    resultBox.textContent = "❌ Missing 'id' in URL.";
+    return;
+  }
+
+  if (!telegram) {
+    resultBox.classList.add("error");
+    resultBox.textContent = "❌ No Telegram ID in localStorage.";
     return;
   }
 
   try {
+    const userRes = await axios.get(`${USER_API_BASE}?telegram=${telegram}`);
+    const user = userRes.data[0];
+
+    if (!user) {
+      resultBox.classList.add("error");
+      resultBox.textContent = `❌ User not found for Telegram: ${telegram}`;
+      return;
+    }
+
     const withdrawRes = await axios.get(WITHDRAW_API);
-    const withdraw = withdrawRes.data.find(w => w.wId === idParam);
+    const withdraw = withdrawRes.data.find(w => w.wId === wIdParam);
 
     if (!withdraw) {
       resultBox.classList.add("error");
-      resultBox.textContent = `❌ No withdraw found for ID: ${idParam}`;
+      resultBox.textContent = `❌ Withdraw ID '${wIdParam}' not found.`;
       return;
     }
 
     if (withdraw.isUsed === "true") {
       resultBox.classList.add("error");
-      resultBox.textContent = `⚠️ This withdraw code is already used.`;
-      return;
-    }
-
-    const userRes = await axios.get(USER_API);
-    const user = userRes.data.find(u => u.accID === withdraw.by);
-
-    if (!user) {
-      resultBox.classList.add("error");
-      resultBox.textContent = `❌ No user found with accID: ${withdraw.by}`;
+      resultBox.textContent = `⚠️ This code has already been used.`;
       return;
     }
 
     const updatedBalance = user.eBalance + Number(withdraw.amount);
 
-    await axios.put(`${USER_API}/${user.id}`, {
+    await axios.put(`${USER_API_BASE}/${user.id}`, {
       ...user,
       eBalance: updatedBalance
     });
@@ -51,16 +58,16 @@ async function scanAndUpdate() {
 
     resultBox.classList.add("success");
     resultBox.innerHTML = `
-      ✅ <b>Success!</b><br/>
-      <b>${withdraw.amount.toLocaleString()} Eshims</b> added to account: <b>${user.accID}</b><br/>
+      ✅ <b>Balance Updated!</b><br/>
+      You received <b>${withdraw.amount.toLocaleString()} Eshims</b><br/>
       <b>New Balance:</b> ${updatedBalance.toLocaleString()}<br/>
-      <b>Status:</b> ${withdraw.status}<br/>
-      <b>Date:</b> ${withdraw.date}
+      <b>Date:</b> ${withdraw.date}<br/>
+      <b>wId:</b> ${withdraw.wId}
     `;
   } catch (err) {
     resultBox.classList.add("error");
-    resultBox.textContent = "⚠️ Failed to complete operation.";
+    resultBox.textContent = "⚠️ Something went wrong during the scan.";
   }
 }
 
-scanAndUpdate();
+scanAndApply();

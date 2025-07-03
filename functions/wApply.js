@@ -18,7 +18,6 @@ try {
   console.error("LocalStorage access error:", e);
 }
 
-// === Axios Global Interceptor ===
 axios.interceptors.response.use(
   (response) => {
     console.log("Response:", response.status, response.config.url);
@@ -69,7 +68,7 @@ async function getBalance() {
       `${USERS_API_BASE}?telegram=${TELEGRAM}`
     );
     const user = userResponse.data[0];
-    balanceDisplay.textContent += user?.eBalance || "0";
+    balanceDisplay.textContent = "Your Balance:" + " " + user?.eBalance || "0";
   } catch (error) {
     console.error("Failed to get balance:", error);
     balanceDisplay.textContent += "Error";
@@ -89,20 +88,18 @@ function renderWithdraws(withdraws) {
     const li = document.createElement("li");
     li.className = "withdraw";
     li.innerHTML = `
-      <span class="wDate">${w.date}</span>
-      <span class="wAmount">💸 ${w.amount} Eshim</span>
-      <span class="wStatus">${w.status}</span>
+    <div class="wContainer">
+    <span class="wStatus">${w.status}</span>
+    <span class="wDate">${w.date}</span>
+    </div>
+    <span class="wAmount">Amount: ${w.amount} Eshim</span>
     `;
 
     if (w.status === "pending") {
-      li.style.background = "#ffe066";
-      li.style.borderLeft = "5px solid orange";
     } else if (w.status === "denied") {
-      li.style.background = "red";
       li.style.cursor = "pointer";
       li.onclick = () => removeWithdraw(w.wId);
     } else {
-      li.style.background = "#00ff9c";
       li.style.cursor = "pointer";
       li.onclick = () => removeWithdraw(w.wId);
     }
@@ -112,9 +109,9 @@ function renderWithdraws(withdraws) {
       marginBottom: "10px",
       borderRadius: "10px",
       display: "flex",
-      justifyContent: "space-between",
-      alignItems: "center",
-      color: "#000",
+      justifyContent: "center",
+      alignItems: "start",
+      color: "#fff",
       fontWeight: "bold",
     });
 

@@ -5,35 +5,35 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./styles/styles.css" />
     <link rel="icon" href="./styles/Images/logo.jpg" />
-    <link href='https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css' rel='stylesheet'>
+    <link
+      href="https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css"
+      rel="stylesheet"
+    />
     <title>Eshim - Crypto</title>
   </head>
   <body>
     <div class="container">
-      <img class="img0" src="./styles/Images/logo.jpg" alt="" />
-      <img class="img1" src="./styles/Images/logo.jpg" alt="" />
+      <img class="img0" src="./styles/Images/logo.jpg" alt="logo" />
+      <img class="img1" src="./styles/Images/logo.jpg" alt="logo" />
       <form class="form">
         <h1 class="box">Eshim</h1>
 
-        <!-- name -->
         <label class="nameLabel">Name:</label>
         <input
-          type="name"
+          type="text"
           placeholder="Enter your name"
           name="name"
           class="nameInput"
         />
-        
-        <!-- telegram -->
+
         <label>Telegram:</label>
         <input
-          type="telegram"
+          type="text"
           placeholder="Enter your telegram"
           name="telegram"
           class="telegramInput"
         />
 
-        <!-- password -->
         <label>Password:</label>
         <input
           type="password"
@@ -42,21 +42,18 @@
           class="passwordInput"
         />
 
-
         <div class="buttons">
           <button type="submit" class="signupBtn">Sign Up</button>
-          <a href="" class="loginLink">Already have an accaunt? Log In!</a>
-         </div>
+          <a href="#" class="loginLink">Already have an account? Log In!</a>
+        </div>
       </form>
+
       <div class="success-alert">
-        <span>
-          <i class='bx bxs-party'></i> Success!  
-        </span> 
-        <i class='bx bx-x x-btn'></i>
+        <span> <i class="bx bxs-party"></i> Success! </span>
+        <i class="bx bx-x x-btn"></i>
       </div>
     </div>
-    <script src="./config.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="./functions/main.js"></script>
+
+    <script type="module" src="./functions/main.js"></script>
   </body>
 </html>

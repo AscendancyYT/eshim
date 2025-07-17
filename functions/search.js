@@ -1,62 +1,79 @@
-// main check
-if (localStorage.getItem("telegram")) {
-  console.log("You are good to go!");
-} else {
-  window.location.href = "../index.html";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  where,
+  getDocs,
+  doc,
+  updateDoc
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+import { firebaseConfig } from "../config.js";
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+
+// Check login
+const telegram = localStorage.getItem("telegram");
+if (!telegram) window.location.href = "../index.html";
+
+// Elements
+const displayBal = document.querySelector(".displayBalance");
+const mineBtn = document.querySelector(".button");
+
+let currentUser = null;
+
+// Get user data
+async function getUser() {
+  const q = query(collection(db, "users"), where("telegram", "==", telegram));
+  const querySnapshot = await getDocs(q);
+  if (querySnapshot.empty) {
+    alert("User not found.");
+    return;
+  }
+  const docSnap = querySnapshot.docs[0];
+  currentUser = { id: docSnap.id, ...docSnap.data() };
+  displayBal.innerText = `Your Balance: ${currentUser.eBalance}`;
 }
 
-// importing
-let displayBal = document.querySelector(".displayBalance");
-let mineBtn = document.querySelector(".button");
+await getUser();
 
-let telegram = localStorage.getItem("telegram");
-let users_api = CONFIG.USERS_API;
-
-// functions
-axios
-  .get(`${users_api}?telegram=${telegram}`)
-  .then((response) => {
-    displayBal.innerHTML += response.data[0].eBalance;
-  })
-  .catch((err) => alert(err));
-
+// Click handler
 mineBtn.onclick = async (e) => {
-  if (mineBtn.disabled) return;
+  if (!currentUser) return;
 
   try {
     mineBtn.disabled = true;
 
-    let user = (await axios.get(`${users_api}?telegram=${telegram}`)).data[0];
-
-    // 100% crit for admins, 5% for normal users
-    let isCrit = user.status === "Admin" ? true : Math.random() < 0.05;
+    // Crit logic
+    let isCrit = currentUser.status === "Admin" ? true : Math.random() < 0.05;
     let earnAmount = isCrit ? 10 : 1;
 
     mineBtn.innerText = isCrit ? "💥 CRIT +10!" : "⛏️ Mining...";
 
     createFloatingText(e.clientX, e.clientY, `+${earnAmount}`, isCrit);
 
-    let newBalance = user.eBalance + earnAmount;
+    // Update balance in Firestore
+    const newBalance = currentUser.eBalance + earnAmount;
+    const userRef = doc(db, "users", currentUser.id);
+    await updateDoc(userRef, { eBalance: newBalance });
 
-    await axios.put(`${users_api}/${user.id}`, {
-      ...user,
-      eBalance: newBalance,
-    });
-
-    displayBal.innerHTML = `Your Balance: ${newBalance}`;
+    currentUser.eBalance = newBalance;
+    displayBal.innerText = `Your Balance: ${newBalance}`;
 
     setTimeout(() => {
       mineBtn.disabled = false;
       mineBtn.innerText = "TAP!";
     }, 100);
   } catch (err) {
-    alert("Error: " + err.message);
+    alert("Mining error: " + err.message);
     mineBtn.disabled = false;
     mineBtn.innerText = "TAP!";
   }
 };
 
-
+// Floating animation
 function createFloatingText(x, y, text, isCrit) {
   const floatText = document.createElement("div");
   floatText.innerText = text;
@@ -67,7 +84,5 @@ function createFloatingText(x, y, text, isCrit) {
   floatText.style.top = `${y}px`;
   document.body.appendChild(floatText);
 
-  setTimeout(() => {
-    floatText.remove();
-  }, 1000);
+  setTimeout(() => floatText.remove(), 1000);
 }

@@ -1,89 +1,127 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <link rel="stylesheet" href="../styles/profile.css">
-  <link rel="icon" href="../styles/Images/logo.jpg">
-  <title>User Profile</title>
-</head>
-<body>
-  <div class="profile-container">
-    <div class="profile-header">
-      <div class="profile-avatar" id="avatar">E</div>
-      <h1 id="profile-name">Loading...</h1>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../styles/profile.css" />
+    <link rel="icon" href="../styles/Images/logo.jpg" />
+    <title>User Profile</title>
+  </head>
+  <body>
+    <div class="profile-container">
+      <div class="profile-header">
+        <div class="profile-avatar" id="avatar">E</div>
+        <h1 id="profile-name">Loading...</h1>
+      </div>
+      <div class="profile-info">
+        <p>
+          <span class="label">Telegram:</span>
+          <span class="value" id="telegram"></span>
+        </p>
+        <p>
+          <span class="label">Account ID:</span>
+          <span class="value" id="accID"></span>
+        </p>
+        <p>
+          <span class="label">Balance:</span>
+          <span class="value" id="balance"></span>
+        </p>
+        <p>
+          <span class="label">Status:</span>
+          <span class="value" id="status"></span>
+        </p>
+      </div>
+
+      <div class="action-buttons">
+        <button class="mineBtn" id="mineEshim">Mine</button>
+      </div>
+      <button class="transaction-button" id="transactionBtn">
+        Make a Transaction
+      </button>
+      <button class="withdraw" id="withdrawBtn">Withdraw</button>
+      <button class="buyBtn" id="buyBtn">Buy</button>
+      <button class="quitBtn" id="quitBtn">Quit</button>
     </div>
-    <div class="profile-info">
-      <p><span class="label">Telegram:</span> <span class="value" id="telegram"></span></p>
-      <p><span class="label">Account ID:</span> <span class="value" id="accID"></span></p>
-      <p><span class="label">Balance:</span> <span class="value" id="balance"></span></p>
-      <p><span class="label">Status:</span> <span class="value" id="status"></span></p>
-    </div>
 
-    <div class="action-buttons">
-      <button onclick="mineEshim()">Mine</button>
-    </div>
-    <button class="transaction-button" onclick="makeTransaction()">Make a Transaction</button>
-    <button class="withdraw" onclick="makeWithdraw()">Withdraw</button>
-    <button class="buyBtn" onclick="buy()">Buy</button>
-    <button class="quitBtn" onclick="quit()">Quit</button>
-  </div>
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+      import {
+        getFirestore,
+        collection,
+        query,
+        where,
+        getDocs,
+      } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-  <script>
-    async function fetchUserByTelegram() {
-      const telegramHandle = localStorage.getItem("telegram");
+      const firebaseConfig = {
+        apiKey: "AIzaSyD0BvBkEdHI2TCt1MH4I8VFAteTUkMw_PE",
+        authDomain: "eshim-coin.firebaseapp.com",
+        projectId: "eshim-coin",
+        storageBucket: "eshim-coin.firebasestorage.app",
+        messagingSenderId: "1027852914663",
+        appId: "1:1027852914663:web:9381d871eedca60896f742",
+        measurementId: "G-M1K1X7QVTS",
+      };
 
-      if (!telegramHandle) {
-        window.location.href="../index.html"
-        return;
-      }
-      try {
-        const url = `https://67c8964c0acf98d07087272b.mockapi.io/users?telegram=${encodeURIComponent(telegramHandle)}`;
-        const res = await fetch(url);
-        const users = await res.json();
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
 
-        if (users.length === 0) {
-          alert("No user found with this Telegram handle.");
+      window.addEventListener("load", fetchUserByTelegram);
+
+      async function fetchUserByTelegram() {
+        const telegramHandle = localStorage.getItem("telegram");
+
+        if (!telegramHandle) {
+          window.location.href = "../index.html";
           return;
         }
 
-        const user = users[0];
+        try {
+          const usersRef = collection(db, "users");
+          const q = query(usersRef, where("telegram", "==", telegramHandle));
+          const querySnapshot = await getDocs(q);
 
-        document.getElementById('profile-name').innerText = user.name;
-        document.getElementById('telegram').innerText = user.telegram;
-        document.getElementById('accID').innerText = user.accID;
-        document.getElementById('balance').innerText = user.eBalance;
-        document.getElementById('status').innerText = user.status;
-        document.getElementById('avatar').innerText = user.name.charAt(0).toUpperCase();
+          if (querySnapshot.empty) {
+            alert("No user found with this Telegram handle.");
+            return;
+          }
 
-      } catch (error) {
-        console.error("Failed to fetch user:", error);
-        alert("Error loading user data.");
+          const userDoc = querySnapshot.docs[0];
+          const user = userDoc.data();
+
+          document.getElementById("profile-name").innerText = user.name || "Unnamed";
+          document.getElementById("telegram").innerText = user.telegram;
+          document.getElementById("accID").innerText = user.accID;
+          document.getElementById("balance").innerText = user.eBalance;
+          document.getElementById("status").innerText = user.status;
+          document.getElementById("avatar").innerText =
+            user.name?.charAt(0).toUpperCase() || "E";
+        } catch (error) {
+          console.error("Failed to fetch user from Firebase:", error);
+          alert("Error loading user data.");
+        }
       }
-    }
 
-    function mineEshim() {
-      window.location.href = "./search-codes.html"
-    }
+      document.getElementById("mineEshim").addEventListener("click", () => {
+        window.location.href = "./search-codes.html";
+      });
 
-    function makeWithdraw(){
-      window.location.href = "./wApply.html"
-    }
+      document.getElementById("transactionBtn").addEventListener("click", () => {
+        window.location.href = "./transactions.html";
+      });
 
-    function makeTransaction() {
-      window.location.href = "./transactions.html"
-    }
-    
-    function quit(){
-      localStorage.removeItem("telegram");
-      window.location.reload()
-    }
+      document.getElementById("withdrawBtn").addEventListener("click", () => {
+        window.location.href = "./wApply.html";
+      });
 
-    function buy(){
-      window.location.href="./buy.html"
-    }
+      document.getElementById("buyBtn").addEventListener("click", () => {
+        window.location.href = "./buy.html";
+      });
 
-    window.onload = fetchUserByTelegram;
-  </script>
-</body>
+      document.getElementById("quitBtn").addEventListener("click", () => {
+        localStorage.removeItem("telegram");
+        window.location.reload();
+      });
+    </script>
+  </body>
 </html>

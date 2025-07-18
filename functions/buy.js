@@ -90,7 +90,7 @@ buyBtn.onclick = async (e) => {
     const user = snapshot.docs[0].data();
     const accID = user.accID;
     const eshimAmount = parseInt(amount.value);
-    const totalPrice = eshimAmount * 50;
+    const totalPrice = eshimAmount * 1;
 
     const purchase = {
       createdAt: new Date().toISOString(),

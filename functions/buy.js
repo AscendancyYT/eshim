@@ -1,19 +1,30 @@
-let accIDInput = document.querySelector(".accIDInput");
-let buyBtn = document.querySelector(".buyBtn");
-let amount = document.querySelector(".amountInput");
-let userTelegram = localStorage.getItem("telegram");
-let xBtn = document.querySelector(".x-btn");
-let successAlert = document.querySelector(".success-alert");
-let priceAmount = document.querySelector(".priceAmount");
-let historyList = document.querySelector(".history-list");
+import {
+  getDocs,
+  query,
+  where,
+  addDoc,
+  collection,
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const db = window.db;
+
+const accIDInput = document.querySelector(".accIDInput");
+const buyBtn = document.querySelector(".buyBtn");
+const amount = document.querySelector(".amountInput");
+const userTelegram = localStorage.getItem("telegram");
+const xBtn = document.querySelector(".x-btn");
+const successAlert = document.querySelector(".success-alert");
+const priceAmount = document.querySelector(".priceAmount");
+const historyList = document.querySelector(".history-list");
 
 const BOT_TOKEN = "7213789475:AAEmE6PldmI0tfVkM1oZ--Ef4HcpvBewIk8";
 const URI_API = `https://api.telegram.org/bot${BOT_TOKEN}/SendMessage`;
 const CHAT_ID = "-4754251527";
 
 function amountOnChange() {
-  priceAmount.innerHTML = amount.value * 50;
+  priceAmount.innerHTML = amount.value * 1;
 }
+window.amountOnChange = amountOnChange;
 
 xBtn.onclick = () => {
   successAlert.style.display = "none";
@@ -21,19 +32,28 @@ xBtn.onclick = () => {
 
 async function fillID() {
   try {
-    const response = await axios.get(`https://67c8964c0acf98d07087272b.mockapi.io/users?telegram=${userTelegram}`);
-    const user = response.data[0];
+    const userQuery = query(
+      collection(db, "users"),
+      where("telegram", "==", userTelegram)
+    );
+    const snapshot = await getDocs(userQuery);
+    if (snapshot.empty) throw new Error("User not found");
+    const user = snapshot.docs[0].data();
     accIDInput.value = user.accID;
-    fetchPurchaseHistory(); // Load purchase history
+    fetchPurchaseHistory(user.accID);
   } catch (err) {
     console.error("Error fetching user accID:", err);
   }
 }
 
-async function fetchPurchaseHistory() {
+async function fetchPurchaseHistory(accID) {
   try {
-    const res = await axios.get(`https://67c8964c0acf98d07087272b.mockapi.io/purchaseReq?accID=${accIDInput.value}`);
-    const purchases = res.data.reverse();
+    const purchaseQuery = query(
+      collection(db, "purchaseReq"),
+      where("accID", "==", accID)
+    );
+    const snapshot = await getDocs(purchaseQuery);
+    const purchases = snapshot.docs.map((doc) => doc.data()).reverse();
 
     if (!purchases.length) {
       historyList.innerHTML = "<li>No purchases yet.</li>";
@@ -41,7 +61,7 @@ async function fetchPurchaseHistory() {
     }
 
     historyList.innerHTML = "";
-    purchases.forEach(p => {
+    purchases.forEach((p) => {
       const li = document.createElement("li");
       li.classList.add(p.status.toLowerCase());
       li.innerHTML = `
@@ -61,37 +81,50 @@ async function fetchPurchaseHistory() {
 buyBtn.onclick = async (e) => {
   e.preventDefault();
   try {
-    const userRes = await axios.get(`https://67c8964c0acf98d07087272b.mockapi.io/users?telegram=${userTelegram}`);
-    const accID = userRes.data[0].accID;
-    const eshimAmount = amount.value;
+    const userQuery = query(
+      collection(db, "users"),
+      where("telegram", "==", userTelegram)
+    );
+    const snapshot = await getDocs(userQuery);
+    if (snapshot.empty) throw new Error("User not found");
+    const user = snapshot.docs[0].data();
+    const accID = user.accID;
+    const eshimAmount = parseInt(amount.value);
     const totalPrice = eshimAmount * 50;
 
-    const res = await axios.post(`https://67c8964c0acf98d07087272b.mockapi.io/purchaseReq`, {
+    const purchase = {
       createdAt: new Date().toISOString(),
       accID,
       status: "waiting",
       amount: eshimAmount,
       price: totalPrice,
-    });
+    };
 
-    let message = `<b>🗒 Purchase Request</b>\n`;
-    message += `<b>Status:</b> ${res.status}\n`;
-    message += `<b>Account:</b> ${accID}\n`;
-    message += `<b>Amount:</b> ${eshimAmount}\n`;
-    message += `<b>Price:</b> ${totalPrice.toLocaleString()} UZS`;
+    await addDoc(collection(db, "purchaseReq"), purchase);
 
-    await axios.post(URI_API, {
-      parse_mode: "html",
-      text: message,
-      chat_id: CHAT_ID,
+    const message = `
+<b>🗒 Purchase Request</b>\n
+<b>Status:</b> waiting\n
+<b>Account:</b> ${accID}\n
+<b>Amount:</b> ${eshimAmount}\n
+<b>Price:</b> ${totalPrice.toLocaleString()} UZS`;
+
+    await fetch(URI_API, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        parse_mode: "html",
+        text: message,
+        chat_id: CHAT_ID,
+      }),
     });
 
     successAlert.style.display = "flex";
     amount.value = "";
     priceAmount.innerHTML = "";
-    fetchPurchaseHistory(); // Refresh list after new purchase
+    fetchPurchaseHistory(accID);
   } catch (err) {
-    alert("Error submitting purchase: " + err);
+    alert("Error submitting purchase: " + err.message);
   }
 };
 

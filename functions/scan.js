@@ -1,5 +1,13 @@
-const WITHDRAW_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
-const USER_API_BASE = "https://67c8964c0acf98d07087272b.mockapi.io/users";
+import {
+  getDocs,
+  collection,
+  query,
+  where,
+  updateDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+const db = window.db;
 const resultBox = document.getElementById("result");
 
 async function scanAndApply() {
@@ -20,23 +28,23 @@ async function scanAndApply() {
   }
 
   try {
-    const userRes = await axios.get(`${USER_API_BASE}?telegram=${telegram}`);
-    const user = userRes.data[0];
+    const userQuery = query(collection(db, "users"), where("telegram", "==", telegram));
+    const userSnap = await getDocs(userQuery);
+    if (userSnap.empty) throw new Error("User not found");
 
-    if (!user) {
-      resultBox.classList.add("error");
-      resultBox.textContent = `❌ User not found for Telegram: ${telegram}`;
-      return;
-    }
+    const userDoc = userSnap.docs[0];
+    const user = { id: userDoc.id, ...userDoc.data() };
 
-    const withdrawRes = await axios.get(WITHDRAW_API);
-    const withdraw = withdrawRes.data.find(w => w.wId === wIdParam);
-
-    if (!withdraw) {
+    const withdrawQuery = query(collection(db, "withdraws"), where("wId", "==", wIdParam));
+    const withdrawSnap = await getDocs(withdrawQuery);
+    if (withdrawSnap.empty) {
       resultBox.classList.add("error");
       resultBox.textContent = `❌ Withdraw ID '${wIdParam}' not found.`;
       return;
     }
+
+    const withdrawDoc = withdrawSnap.docs[0];
+    const withdraw = { id: withdrawDoc.id, ...withdrawDoc.data() };
 
     if (withdraw.isUsed === "true") {
       resultBox.classList.add("error");
@@ -46,25 +54,24 @@ async function scanAndApply() {
 
     const updatedBalance = user.eBalance + Number(withdraw.amount);
 
-    await axios.put(`${USER_API_BASE}/${user.id}`, {
-      ...user,
+    await updateDoc(doc(db, "users", user.id), {
       eBalance: updatedBalance
     });
 
-    await axios.put(`${WITHDRAW_API}/${withdraw.id}`, {
-      ...withdraw,
+    await updateDoc(doc(db, "withdraws", withdraw.id), {
       isUsed: "true"
     });
 
     resultBox.classList.add("success");
     resultBox.innerHTML = `
       ✅ <b>Balance Updated!</b><br/>
-      You received <b>${withdraw.amount.toLocaleString()} Eshims</b><br/>
+      You received <b>${Number(withdraw.amount).toLocaleString()} Eshims</b><br/>
       <b>New Balance:</b> ${updatedBalance.toLocaleString()}<br/>
       <b>Date:</b> ${withdraw.date}<br/>
       <b>wId:</b> ${withdraw.wId}
     `;
   } catch (err) {
+    console.error(err);
     resultBox.classList.add("error");
     resultBox.textContent = "⚠️ Something went wrong during the scan.";
   }

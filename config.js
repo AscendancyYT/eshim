@@ -1,3 +1,6 @@
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
 export const firebaseConfig = {
   apiKey: "AIzaSyD0BvBkEdHI2TCt1MH4I8VFAteTUkMw_PE",
   authDomain: "eshim-coin.firebaseapp.com",
@@ -10,7 +13,8 @@ export const firebaseConfig = {
 
 export const CONFIG = {
   ADMIN_BOT_TOKEN: "7213789475:AAEmE6PldmI0tfVkM1oZ--Ef4HcpvBewIk8",
-  USERS_API: "https://67c8964c0acf98d07087272b.mockapi.io/users",
-  TRANSACTIONS_API: "https://67c8964c0acf98d07087272b.mockapi.io/transactions",
   ADMIN_CHAT_ID: "-4754251527"
-}
+};
+
+export const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);

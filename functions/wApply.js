@@ -1,3 +1,15 @@
+import {
+  collection,
+  query,
+  where,
+  getDocs,
+  addDoc,
+  updateDoc,
+  deleteDoc,
+  doc
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+import { db, CONFIG } from "../config.js";
+
 const submitBtn = document.querySelector(".submitBtn");
 const amntInp = document.querySelector(".amntInp");
 const btnText = submitBtn.querySelector(".btnText");
@@ -5,34 +17,8 @@ const spinner = submitBtn.querySelector(".spinner");
 const withdrawList = document.querySelector(".withdraws");
 const balanceDisplay = document.querySelector(".balance");
 
-const WITHD_API = "https://67c8964c0acf98d07087272b.mockapi.io/withdraws";
-const USERS_API_BASE = CONFIG.USERS_API;
-const BOT_TOKEN = CONFIG.ADMIN_BOT_TOKEN;
-const CHAT_ID = CONFIG.ADMIN_CHAT_ID;
 const characters = "ABCDEFGHIJKLMNOPQRSTUVXYZ1234567890";
-
-let TELEGRAM = "";
-try {
-  TELEGRAM = localStorage.getItem("telegram") || "";
-} catch (e) {
-  console.error("LocalStorage access error:", e);
-}
-
-axios.interceptors.response.use(
-  (response) => {
-    console.log("Response:", response.status, response.config.url);
-    return response;
-  },
-  (error) => {
-    console.error(
-      "API Error:",
-      error.config?.url,
-      error.response?.status,
-      error.message
-    );
-    return Promise.reject(error);
-  }
-);
+let TELEGRAM = localStorage.getItem("telegram") || "";
 
 function idGenerator(length) {
   return Array.from({ length }, () =>
@@ -40,68 +26,41 @@ function idGenerator(length) {
   ).join("");
 }
 
-async function getUserId() {
-  try {
-    if (!TELEGRAM) throw new Error("Telegram ID not available");
-
-    const userResponse = await axios.get(
-      `${USERS_API_BASE}?telegram=${TELEGRAM}`
-    );
-    if (!userResponse.data || userResponse.data.length === 0) {
-      throw new Error("User not found");
-    }
-    return userResponse.data[0].accID;
-  } catch (error) {
-    console.error("Failed to get user ID:", error);
-    throw error;
-  }
+async function getUserByTelegram() {
+  const q = query(collection(db, "users"), where("telegram", "==", TELEGRAM));
+  const snapshot = await getDocs(q);
+  if (snapshot.empty) throw new Error("User not found");
+  const docSnap = snapshot.docs[0];
+  return { id: docSnap.id, ...docSnap.data() };
 }
 
-async function getBalance() {
-  try {
-    if (!TELEGRAM) {
-      balanceDisplay.textContent += "0";
-      return;
-    }
-
-    const userResponse = await axios.get(
-      `${USERS_API_BASE}?telegram=${TELEGRAM}`
-    );
-    const user = userResponse.data[0];
-    balanceDisplay.textContent = "Your Balance:" + " " + user?.eBalance || "0";
-  } catch (error) {
-    console.error("Failed to get balance:", error);
-    balanceDisplay.textContent += "Error";
-  }
+async function getWithdrawsByUserId(userId) {
+  const q = query(collection(db, "withdraws"), where("by", "==", userId));
+  const snapshot = await getDocs(q);
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 }
 
 function renderWithdraws(withdraws) {
   withdrawList.innerHTML = "";
-
-  if (!withdraws || withdraws.length === 0) {
-    withdrawList.innerHTML =
-      '<li class="no-withdraws">No withdraw history</li>';
+  if (!withdraws.length) {
+    withdrawList.innerHTML = '<li class="no-withdraws">No withdraw history</li>';
     return;
   }
 
-  withdraws.forEach((w) => {
+  withdraws.forEach(w => {
     const li = document.createElement("li");
     li.className = "withdraw";
     li.innerHTML = `
-    <div class="wContainer">
-    <span class="wStatus">${w.status}</span>
-    <span class="wDate">${w.date}</span>
-    </div>
-    <span class="wAmount">Amount: ${w.amount} Eshim</span>
+      <div class="wContainer">
+        <span class="wStatus">${w.status}</span>
+        <span class="wDate">${w.date}</span>
+      </div>
+      <span class="wAmount">Amount: ${w.amount} Eshim</span>
     `;
 
-    if (w.status === "pending") {
-    } else if (w.status === "denied") {
+    if (w.status !== "pending") {
       li.style.cursor = "pointer";
-      li.onclick = () => removeWithdraw(w.wId);
-    } else {
-      li.style.cursor = "pointer";
-      li.onclick = () => removeWithdraw(w.wId);
+      li.onclick = () => removeWithdraw(w.id);
     }
 
     Object.assign(li.style, {
@@ -112,32 +71,29 @@ function renderWithdraws(withdraws) {
       justifyContent: "center",
       alignItems: "start",
       color: "#fff",
-      fontWeight: "bold",
+      fontWeight: "bold"
     });
 
     withdrawList.appendChild(li);
   });
 }
 
-async function removeWithdraw(wId) {
-  try {
-    let withdraws = JSON.parse(localStorage.getItem("myWithdraws")) || [];
-    const target = withdraws.find((w) => w.wId === wId);
-    if (!target) return;
+async function removeWithdraw(docId) {
+  await deleteDoc(doc(db, "withdraws", docId));
+  updateWithdraws();
+}
 
-    await axios.delete(`${WITHD_API}/${target.id}`);
-    withdraws = withdraws.filter((w) => w.wId !== wId);
-    localStorage.setItem("myWithdraws", JSON.stringify(withdraws));
-    renderWithdraws(withdraws);
-  } catch (err) {
-    console.error("Failed to delete withdraw:", err);
-    console.log("Failed to remove. Please try again.");
+async function getBalance() {
+  try {
+    const user = await getUserByTelegram();
+    balanceDisplay.textContent = "Your Balance: " + user.eBalance;
+  } catch {
+    balanceDisplay.textContent += "0";
   }
 }
 
 document.querySelector(".form").addEventListener("submit", async function (e) {
   e.preventDefault();
-
   submitBtn.disabled = true;
   btnText.textContent = "Processing...";
   spinner.style.display = "inline-block";
@@ -145,62 +101,41 @@ document.querySelector(".form").addEventListener("submit", async function (e) {
 
   try {
     const amount = parseFloat(amntInp.value);
-    if (isNaN(amount) || amount <= 0) {
-      throw new Error("Please enter a valid amount");
-    }
+    if (isNaN(amount) || amount <= 0) throw new Error("Invalid amount");
 
-    const userResponse = await axios.get(
-      `${USERS_API_BASE}?telegram=${TELEGRAM}`
-    );
-    const user = userResponse.data[0];
-    if (!user) throw new Error("User account not found");
+    const user = await getUserByTelegram();
+    if (amount > user.eBalance) throw new Error("Insufficient balance");
 
-    const balance = parseFloat(user.eBalance);
-    if (amount > balance) throw new Error("Insufficient balance");
-
-    let existing = [];
-    try {
-      const res = await axios.get(`${WITHD_API}?by=${user.accID}`);
-      existing = Array.isArray(res.data) ? res.data : [];
-    } catch (err) {
-      if (err.response?.status !== 404) throw err;
-    }
-
-    const activeWithdraws = existing.filter((w) => w.status === "pending");
-    if (activeWithdraws.length >= 3) {
-      throw new Error("Maximum 3 pending withdraws allowed");
-    }
+    const withdraws = await getWithdrawsByUserId(user.accID);
+    if (withdraws.filter(w => w.status === "pending").length >= 3)
+      throw new Error("Max 3 pending withdraws");
 
     const withdrawal = {
       wId: idGenerator(7),
       amount,
       by: user.accID,
       date: new Date().toLocaleString(),
-      status: "pending",
+      status: "pending"
     };
 
-    const { data: newWithdraw } = await axios.post(WITHD_API, withdrawal);
+    await addDoc(collection(db, "withdraws"), withdrawal);
 
-    await axios.put(`${USERS_API_BASE}/${user.id}`, {
-      eBalance: balance - amount,
+    await updateDoc(doc(db, "users", user.id), {
+      eBalance: user.eBalance - amount
     });
 
-    try {
-      await axios.post(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        chat_id: CHAT_ID,
+    await fetch(`https://api.telegram.org/bot${CONFIG.ADMIN_BOT_TOKEN}/sendMessage`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        chat_id: CONFIG.ADMIN_CHAT_ID,
         parse_mode: "HTML",
-        text: `<b>New Withdraw Request</b>\n<b>User: </b> ${
-          user.name
-        }\n<b>Date: </b> ${new Date().toLocaleDateString()}\n<b>Amount: </b> ${amount}`,
-      });
-    } catch (tgError) {
-      console.warn("Telegram notification failed:", tgError.message);
-    }
+        text: `<b>New Withdraw Request</b>\n<b>User:</b> ${user.name}\n<b>Date:</b> ${new Date().toLocaleDateString()}\n<b>Amount:</b> ${amount}`
+      })
+    });
 
-    const updatedWithdraws = [...existing, newWithdraw];
-    localStorage.setItem("myWithdraws", JSON.stringify(updatedWithdraws));
-    renderWithdraws(updatedWithdraws);
     amntInp.value = "";
+    await updateWithdraws();
     await getBalance();
   } catch (err) {
     console.error("Withdraw failed:", err.message);
@@ -218,46 +153,17 @@ function resetButton() {
 
 async function updateWithdraws() {
   try {
-    const userId = await getUserId();
-    let latest = [];
-    try {
-      const response = await axios.get(`${WITHD_API}?by=${userId}`);
-      latest = Array.isArray(response.data) ? response.data : [];
-    } catch (err) {
-      if (err.response?.status !== 404) throw err;
-    }
-
-    const stored = JSON.stringify(
-      JSON.parse(localStorage.getItem("myWithdraws")) || []
-    );
-    const latestJSON = JSON.stringify(latest);
-
-    if (stored !== latestJSON) {
-      localStorage.setItem("myWithdraws", latestJSON);
-      renderWithdraws(latest);
-    }
+    const user = await getUserByTelegram();
+    const withdraws = await getWithdrawsByUserId(user.accID);
+    localStorage.setItem("myWithdraws", JSON.stringify(withdraws));
+    renderWithdraws(withdraws);
   } catch (err) {
-    return err;
+    console.error("Update withdraws failed:", err);
   }
 }
 
 (async () => {
-  try {
-    await getBalance();
-    const userId = await getUserId();
-    let withdraws = [];
-    try {
-      const response = await axios.get(`${WITHD_API}?by=${userId}`);
-      withdraws = Array.isArray(response.data) ? response.data : [];
-    } catch (err) {
-      if (err.response?.status !== 404) throw err;
-    }
-    localStorage.setItem("myWithdraws", JSON.stringify(withdraws));
-    renderWithdraws(withdraws);
-  } catch (err) {
-    renderWithdraws([]);
-    console.log(err);
-  }
-
+  await getBalance();
+  await updateWithdraws();
   setInterval(updateWithdraws, 10000);
 })();

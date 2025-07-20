@@ -3,83 +3,83 @@
   margin: 0;
   box-sizing: border-box;
   list-style: none;
-  text-decoration: dashed;
+  text-decoration: none;
   outline: none;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+}
+
+body {
+  background-color: #0f1615;
+  color: #ffffff;
+  min-height: 100vh;
 }
 
 .container {
   width: 100vw;
-  height: 100vh;
-  position: relative;
-  overflow-x: hidden;
-  background-color: #0f1615;
-}
-
-.container .displayBalance {
-  width: 100%;
-  height: 10%;
+  min-height: 100vh;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #0f1615 0%, #1a2a2c 100%);
+}
+
+.displayBalance {
+  font-size: 2.5rem;
+  font-weight: 700;
   color: #00ff9c;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  text-shadow: 0 0 10px rgba(0, 255, 156, 0.5);
 }
 
-.container .circle {
-  width: 100%;
-  height: 80%;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.sessionBalance {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #66ffcc;
+  margin-bottom: 1rem;
+  text-align: center;
 }
 
-.container .circle .button {
-  width: 500px;
-  height: 500px;
+.miningStatus {
+  font-size: 1.25rem;
+  font-weight: 500;
+  color: #ff4d4d;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
 
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+.currentHash,
+.hashProgress {
+  font-size: 1.1rem;
+  font-weight: 400;
+  color: #b0b0b0;
+  margin-bottom: 0.75rem;
+  text-align: center;
+}
 
-  cursor: pointer;
-  font-weight: 900;
-  font-size: xx-large;
-
-  background-color: #00ff9c;
-  box-shadow: 0 0 20px #00ff9c33;
+.mineBtn {
+  padding: 12px 24px;
+  font-size: 1.1rem;
+  font-weight: 600;
   color: #0f1615;
-
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
+  background-color: #00ff9c;
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(0, 255, 156, 0.3);
 }
 
-.floating-text {
-  position: absolute;
-  z-index: 9999;
-  font-size: 30px;
-  font-weight: bold;
-  color: white;
-  pointer-events: none;
-  animation: floatUp 1s ease-out forwards;
-  transform: translate(-50%, -50%);
+.mineBtn:hover {
+  background-color: #00cc7a;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0, 255, 156, 0.5);
 }
 
-.floating-text.crit {
-  color: gold;
-  font-size: 26px;
-  text-shadow: 0 0 10px yellow;
+.mineBtn:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 10px rgba(0, 255, 156, 0.2);
 }
 
-@keyframes floatUp {
-  0% {
-    opacity: 1;
-    transform: translate(-50%, -50%) scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: translate(-50%, -150%) scale(1.5);
-  }
-}

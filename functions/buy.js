@@ -22,7 +22,7 @@ const URI_API = `https://api.telegram.org/bot${BOT_TOKEN}/SendMessage`;
 const CHAT_ID = "-4754251527";
 
 function amountOnChange() {
-  priceAmount.innerHTML = amount.value * 1;
+  priceAmount.innerHTML = amount.value * 100;
 }
 window.amountOnChange = amountOnChange;
 
@@ -90,7 +90,7 @@ buyBtn.onclick = async (e) => {
     const user = snapshot.docs[0].data();
     const accID = user.accID;
     const eshimAmount = parseInt(amount.value);
-    const totalPrice = eshimAmount * 1;
+    const totalPrice = eshimAmount * 100;
 
     const purchase = {
       createdAt: new Date().toISOString(),

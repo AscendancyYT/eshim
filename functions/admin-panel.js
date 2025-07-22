@@ -2,7 +2,9 @@ import {
   collection,
   getDocs,
   updateDoc,
-  doc
+  doc,
+  setDoc,
+  serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const db = window.db;
@@ -243,6 +245,26 @@ async function updatePurchase(id, status) {
 
   await fetchPurchases();
 }
+
+const auctionForm = document.getElementById("auctionForm");
+auctionForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const eshimId = document.getElementById("auctionEshimId").value.trim();
+  if (!eshimId) return alert("Enter a valid ESHIM ID");
+
+  const auctionRef = doc(db, "auction", "current");
+  await setDoc(auctionRef, {
+    eshimId,
+    isActive: true,
+    startedAt: serverTimestamp(),
+    topBid: 0,
+    topUser: null,
+    duration: 60
+  });
+
+  alert("Auction started successfully for ESHIM ID: " + eshimId);
+  auctionForm.reset();
+});
 
 
 fetchUsers();

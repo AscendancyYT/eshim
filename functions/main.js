@@ -20,16 +20,13 @@ const firebaseConfig = {
   measurementId: "G-M1K1X7QVTS",
 };
 
-// Initialize Firebase
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const usersRef = collection(db, "users");
 
-// Local check
 if (localStorage.getItem("telegram")) {
   window.location.href = "../src/profile.html";
 } else {
-  // DOM elements
   const nameInput = document.querySelector(".nameInput");
   const passwordInput = document.querySelector(".passwordInput");
   const telegramInput = document.querySelector(".telegramInput");
@@ -40,7 +37,6 @@ if (localStorage.getItem("telegram")) {
   const xBtn = document.querySelector(".x-btn");
   const successAlert = document.querySelector(".success-alert");
 
-  // Generate Random Account ID
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567891234567890";
   function generateID(length) {
     let id = "";
@@ -50,7 +46,6 @@ if (localStorage.getItem("telegram")) {
     return id;
   }
 
-  // 🔓 SWITCH TO LOGIN MODE
   loginLink.addEventListener("click", (e) => {
     e.preventDefault();
 
@@ -68,13 +63,16 @@ if (localStorage.getItem("telegram")) {
     form.addEventListener("submit", async (e) => {
       e.preventDefault();
 
-      const q = query(usersRef, where("telegram", "==", telegramInput.value.trim()));
+      const tg = telegramInput.value.trim();
+      const pw = passwordInput.value;
+
+      const q = query(usersRef, where("telegram", "==", tg));
       const querySnapshot = await getDocs(q);
 
       let foundUser = null;
       querySnapshot.forEach((doc) => {
         const user = doc.data();
-        if (user.password === passwordInput.value) {
+        if (user.password === pw) {
           foundUser = user;
         }
       });
@@ -84,21 +82,26 @@ if (localStorage.getItem("telegram")) {
         return;
       }
 
-      window.location.href = "../src/profile.html";
-      localStorage.setItem("telegram", telegramInput.value);
+      // ✅ Save user to localStorage
+      localStorage.setItem("telegram", foundUser.telegram);
+      localStorage.setItem("accID", foundUser.accID); // ✅ Needed for auction
       localStorage.setItem("goodTG", true);
-      console.log("Logged in:", foundUser);
+
+      window.location.href = "../src/profile.html";
     }, { once: true });
   });
 
-  // ✅ SIGN UP NEW USER
   form.addEventListener("submit", async function (e) {
     e.preventDefault();
 
     if (nameInput.style.display === "none") return;
 
     try {
-      const q = query(usersRef, where("telegram", "==", telegramInput.value.trim()));
+      const tg = telegramInput.value.trim();
+      const pw = passwordInput.value;
+      const name = nameInput.value.trim();
+
+      const q = query(usersRef, where("telegram", "==", tg));
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
@@ -106,19 +109,24 @@ if (localStorage.getItem("telegram")) {
         return;
       }
 
-      await addDoc(usersRef, {
-        name: nameInput.value.trim(),
+      const newUser = {
+        name,
         accID: generateID(12),
         eBalance: 0,
-        status: telegramInput.value.trim() === "@AzizbekEshimov" ? "Admin" : "User",
-        password: passwordInput.value,
-        telegram: telegramInput.value.trim(),
-      });
+        status: tg === "@AzizbekEshimov" ? "Admin" : "User",
+        password: pw,
+        telegram: tg,
+      };
+
+      await addDoc(usersRef, newUser);
+
+      // ✅ Save user to localStorage on registration too
+      localStorage.setItem("telegram", newUser.telegram);
+      localStorage.setItem("accID", newUser.accID); // ✅ For auction
+      localStorage.setItem("goodTG", true);
 
       window.location.href = "../src/profile.html";
       successAlert.style.display = "flex";
-      localStorage.setItem("telegram", telegramInput.value);
-      localStorage.setItem("goodTG", true);
       form.reset();
     } catch (error) {
       console.error("Error:", error);
@@ -126,7 +134,6 @@ if (localStorage.getItem("telegram")) {
     }
   });
 
-  // ❌ CLOSE SUCCESS ALERT
   xBtn.onclick = () => {
     successAlert.style.display = "none";
   };

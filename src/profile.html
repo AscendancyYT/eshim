@@ -40,6 +40,7 @@
       </button>
       <button class="withdraw" id="withdrawBtn">Withdraw</button>
       <button class="buyBtn" id="buyBtn">Buy</button>
+      <button class="auctionBtn" id="auctionBtn">NFT Auction</button>
       <button class="quitBtn" id="quitBtn">Quit</button>
     </div>
 
@@ -117,6 +118,10 @@
       document.getElementById("buyBtn").addEventListener("click", () => {
         window.location.href = "./buy.html";
       });
+
+      document.getElementById("auctionBtn").addEventListener("click", () => {
+        window.location.href="./auction.html"
+      })
 
       document.getElementById("quitBtn").addEventListener("click", () => {
         localStorage.removeItem("telegram");

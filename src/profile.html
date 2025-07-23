@@ -6,38 +6,41 @@
     <link rel="stylesheet" href="../styles/profile.css" />
     <link rel="icon" href="../styles/Images/logo.jpg" />
     <title>User Profile</title>
+    <style>
+      .badge {
+        padding: 3px 8px;
+        border-radius: 12px;
+        margin-left: 10px;
+        font-size: 0.75rem;
+        font-weight: bold;
+        color: white;
+        background-color: gray;
+        vertical-align: middle;
+        display: none;
+      }
+    </style>
   </head>
   <body>
     <div class="profile-container">
       <div class="profile-header">
         <div class="profile-avatar" id="avatar">E</div>
-        <h1 id="profile-name">Loading...</h1>
+        <h1 id="profile-name">
+          Loading...
+          <span id="badge" class="badge"></span>
+        </h1>
       </div>
+
       <div class="profile-info">
-        <p>
-          <span class="label">Telegram:</span>
-          <span class="value" id="telegram"></span>
-        </p>
-        <p>
-          <span class="label">Account ID:</span>
-          <span class="value" id="accID"></span>
-        </p>
-        <p>
-          <span class="label">Balance:</span>
-          <span class="value" id="balance"></span>
-        </p>
-        <p>
-          <span class="label">Status:</span>
-          <span class="value" id="status"></span>
-        </p>
+        <p><span class="label">Telegram:</span> <span class="value" id="telegram"></span></p>
+        <p><span class="label">Account ID:</span> <span class="value" id="accID"></span></p>
+        <p><span class="label">Balance:</span> <span class="value" id="balance"></span></p>
+        <p><span class="label">Status:</span> <span class="value" id="status"></span></p>
       </div>
 
       <div class="action-buttons">
         <button class="mineBtn" id="mineEshim">Mine</button>
       </div>
-      <button class="transaction-button" id="transactionBtn">
-        Make a Transaction
-      </button>
+      <button class="transaction-button" id="transactionBtn">Make a Transaction</button>
       <button class="withdraw" id="withdrawBtn">Withdraw</button>
       <button class="buyBtn" id="buyBtn">Buy</button>
       <button class="auctionBtn" id="auctionBtn">NFT Auction</button>
@@ -90,13 +93,28 @@
           const userDoc = querySnapshot.docs[0];
           const user = userDoc.data();
 
-          document.getElementById("profile-name").innerText = user.name || "Unnamed";
+          document.getElementById("profile-name").childNodes[0].textContent = user.name || "Unnamed";
           document.getElementById("telegram").innerText = user.telegram;
           document.getElementById("accID").innerText = user.accID;
           document.getElementById("balance").innerText = user.eBalance;
           document.getElementById("status").innerText = user.status;
-          document.getElementById("avatar").innerText =
-            user.name?.charAt(0).toUpperCase() || "E";
+          document.getElementById("avatar").innerText = user.name?.charAt(0).toUpperCase() || "E";
+
+          const badgeEl = document.getElementById("badge");
+
+          if (user.badge) {
+            badgeEl.textContent = `🏅 ${user.badge}`;
+            badgeEl.style.display = "inline-block";
+
+            const badgeType = user.badge.toLowerCase();
+            if (badgeType === "vip") badgeEl.style.backgroundColor = "gold";
+            else if (badgeType === "founder") badgeEl.style.backgroundColor = "#9b59b6";
+            else if (badgeType === "mod") badgeEl.style.backgroundColor = "#3498db";
+            else badgeEl.style.backgroundColor = "gray";
+          } else {
+            badgeEl.style.display = "none";
+          }
+
         } catch (error) {
           console.error("Failed to fetch user from Firebase:", error);
           alert("Error loading user data.");
@@ -120,8 +138,8 @@
       });
 
       document.getElementById("auctionBtn").addEventListener("click", () => {
-        window.location.href="./auction.html"
-      })
+        window.location.href = "./auction.html";
+      });
 
       document.getElementById("quitBtn").addEventListener("click", () => {
         localStorage.removeItem("telegram");

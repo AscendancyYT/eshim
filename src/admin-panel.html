@@ -11,26 +11,32 @@
     <div class="search-bar">
       <input id="search-user" placeholder="Search user by accID..." />
       <input id="search-withdraw" placeholder="Search withdraw by wId..." />
+      <input id="search-transaction" placeholder="Search transactions..." />
+      <input id="search-purchase" placeholder="Search purchases..." />
     </div>
 
     <section class="admin-container">
-      <div class="user-panel">
-        <h2>👤 Users</h2>
-        <ul class="admin-users"></ul>
+      <div class="top">
+        <div class="user-panel">
+          <h2>👤 Users</h2>
+          <ul class="admin-users"></ul>
+        </div>
+  
+        <div class="withdraw-panel">
+          <h2>💸 Withdraw Requests</h2>
+          <ul class="admin-withdraws"></ul>
+        </div>
       </div>
-
-      <div class="withdraw-panel">
-        <h2>💸 Withdraw Requests</h2>
-        <ul class="admin-withdraws"></ul>
-      </div>
-
-      <div class="transaction-panel">
-        <h2>🔁 Transactions</h2>
-        <ul class="admin-transactions"></ul>
-      </div>
-      <div class="purchase-panel">
-        <h2>🛒 Purchases</h2>
-        <ul class="admin-purchases"></ul>
+      
+      <div class="bottom">
+        <div class="transaction-panel">
+          <h2>🔁 Transactions</h2>
+          <ul class="admin-transactions"></ul>
+        </div>
+        <div class="purchase-panel">
+          <h2>🛒 Purchases</h2>
+          <ul class="admin-purchases"></ul>
+        </div>
       </div>
       <div class="auction-panel">
         <h2>🔥 Start Auction</h2>

@@ -4,7 +4,7 @@ import {
   updateDoc,
   doc,
   setDoc,
-  serverTimestamp
+  serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const db = window.db;
@@ -16,6 +16,8 @@ const purchaseList = document.querySelector(".admin-purchases");
 
 const searchUserInput = document.getElementById("search-user");
 const searchWithdrawInput = document.getElementById("search-withdraw");
+const searchTransactionInput = document.getElementById("search-transaction");
+const searchPurchaseInput = document.getElementById("search-purchase");
 
 const modal = document.querySelector(".modal");
 const modalForm = document.querySelector(".modal-form");
@@ -25,13 +27,19 @@ const modalInputs = {
   password: document.getElementById("edit-password"),
   telegram: document.getElementById("edit-telegram"),
   eBalance: document.getElementById("edit-balance"),
-  status: document.getElementById("edit-status")
+  status: document.getElementById("edit-status"),
 };
 
 let allUsers = [];
 let allWithdraws = [];
 let allPurchases = [];
+let allTransactions = [];
 let selectedUserId = null;
+
+let isSearchingUsers = false;
+let isSearchingWithdraws = false;
+let isSearchingTransactions = false;
+let isSearchingPurchases = false;
 
 function searchSort(list, query, key) {
   const q = query.toLowerCase();
@@ -42,7 +50,7 @@ function searchSort(list, query, key) {
         ? 2
         : item[key]?.toLowerCase().includes(q)
         ? 1
-        : 0
+        : 0,
     }))
     .filter((r) => r.score > 0)
     .sort((a, b) => b.score - a.score)
@@ -80,7 +88,6 @@ function renderUserList(users, limit = true) {
 function renderAdminWithdraws(withdraws, limit = true) {
   adminList.innerHTML = "";
   const display = limit ? withdraws.slice(-15).reverse() : withdraws;
-
   display.forEach((w) => {
     const li = document.createElement("li");
     li.innerHTML = `
@@ -128,7 +135,6 @@ function renderTransactions(list) {
 function renderPurchases(purchases, limit = true) {
   purchaseList.innerHTML = "";
   const display = limit ? purchases.slice(-15).reverse() : purchases;
-
   if (!display.length) {
     purchaseList.innerHTML = "<li>No purchases found.</li>";
     return;
@@ -161,16 +167,55 @@ function renderPurchases(purchases, limit = true) {
 
 searchUserInput.oninput = () => {
   const query = searchUserInput.value.trim();
-  if (!query) return renderUserList(allUsers, true);
-  const filtered = searchSort(allUsers, query, "accID");
-  renderUserList(filtered, false);
+  isSearchingUsers = !!query;
+  if (!query) {
+    renderUserList(allUsers, true);
+  } else {
+    const filtered = searchSort(allUsers, query, "accID");
+    renderUserList(filtered, false);
+  }
 };
 
 searchWithdrawInput.oninput = () => {
   const query = searchWithdrawInput.value.trim();
-  if (!query) return renderAdminWithdraws(allWithdraws, true);
-  const filtered = searchSort(allWithdraws, query, "wId");
-  renderAdminWithdraws(filtered, false);
+  isSearchingWithdraws = !!query;
+  if (!query) {
+    renderAdminWithdraws(allWithdraws, true);
+  } else {
+    const filtered = searchSort(allWithdraws, query, "wId");
+    renderAdminWithdraws(filtered, false);
+  }
+};
+
+searchTransactionInput.oninput = () => {
+  const query = searchTransactionInput.value.trim().toLowerCase();
+  isSearchingTransactions = !!query;
+  if (!query) {
+    renderTransactions(allTransactions.slice(-15).reverse());
+  } else {
+    const filtered = allTransactions.filter((tx) =>
+      tx.trId?.toLowerCase().includes(query) ||
+      tx.host?.name?.toLowerCase().includes(query) ||
+      tx.guest?.name?.toLowerCase().includes(query) ||
+      new Date(tx.date).toLocaleString().toLowerCase().includes(query)
+    );
+    renderTransactions(filtered);
+  }
+};
+
+searchPurchaseInput.oninput = () => {
+  const query = searchPurchaseInput.value.trim().toLowerCase();
+  isSearchingPurchases = !!query;
+  if (!query) {
+    renderPurchases(allPurchases, true);
+  } else {
+    const filtered = allPurchases.filter((p) =>
+      p.accID?.toLowerCase().includes(query) ||
+      p.status?.toLowerCase().includes(query) ||
+      new Date(p.createdAt).toLocaleString().toLowerCase().includes(query)
+    );
+    renderPurchases(filtered, false);
+  }
 };
 
 modalForm.addEventListener("submit", async (e) => {
@@ -182,7 +227,7 @@ modalForm.addEventListener("submit", async (e) => {
     name: modalInputs.name.value,
     password: modalInputs.password.value,
     telegram: modalInputs.telegram.value,
-    eBalance: parseFloat(modalInputs.eBalance.value) || 0
+    eBalance: parseFloat(modalInputs.eBalance.value) || 0,
   };
 
   await updateDoc(doc(db, "users", selectedUserId), updatedUser);
@@ -190,33 +235,32 @@ modalForm.addEventListener("submit", async (e) => {
   await fetchUsers();
 });
 
-window.onclick = function (e) {
+window.onclick = (e) => {
   if (e.target === modal) closeModal();
 };
 
-// Fetchers
 async function fetchUsers() {
   const snapshot = await getDocs(collection(db, "users"));
-  allUsers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  renderUserList(allUsers, true);
+  allUsers = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  if (!isSearchingUsers) renderUserList(allUsers, true);
 }
 
 async function fetchWithdraws() {
   const snapshot = await getDocs(collection(db, "withdraws"));
-  allWithdraws = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  renderAdminWithdraws(allWithdraws, true);
+  allWithdraws = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  if (!isSearchingWithdraws) renderAdminWithdraws(allWithdraws, true);
 }
 
 async function fetchTransactions() {
   const snapshot = await getDocs(collection(db, "transactions"));
-  const txs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  renderTransactions(txs.slice(-15).reverse());
+  allTransactions = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  if (!isSearchingTransactions) renderTransactions(allTransactions.slice(-15).reverse());
 }
 
 async function fetchPurchases() {
   const snapshot = await getDocs(collection(db, "purchaseReq"));
-  allPurchases = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-  renderPurchases(allPurchases, true);
+  allPurchases = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
+  if (!isSearchingPurchases) renderPurchases(allPurchases, true);
 }
 
 async function updateWithdraw(id, status) {
@@ -229,13 +273,12 @@ async function updatePurchase(id, status) {
 
   if (status === "approved") {
     const snapshot = await getDocs(collection(db, "purchaseReq"));
-    const purchaseDoc = snapshot.docs.find(doc => doc.id === id);
+    const purchaseDoc = snapshot.docs.find((doc) => doc.id === id);
     const purchase = purchaseDoc?.data();
 
     if (purchase) {
       const { accID, amount } = purchase;
-      const user = allUsers.find(u => u.accID === accID);
-
+      const user = allUsers.find((u) => u.accID === accID);
       if (user) {
         const updatedBalance = (parseFloat(user.eBalance) || 0) + (parseFloat(amount) || 0);
         await updateDoc(doc(db, "users", user.id), { eBalance: updatedBalance });
@@ -246,8 +289,7 @@ async function updatePurchase(id, status) {
   await fetchPurchases();
 }
 
-const auctionForm = document.getElementById("auctionForm");
-auctionForm.addEventListener("submit", async (e) => {
+document.getElementById("auctionForm").addEventListener("submit", async (e) => {
   e.preventDefault();
   const eshimId = document.getElementById("auctionEshimId").value.trim();
   if (!eshimId) return alert("Enter a valid ESHIM ID");
@@ -259,19 +301,26 @@ auctionForm.addEventListener("submit", async (e) => {
     startedAt: serverTimestamp(),
     topBid: 0,
     topUser: null,
-    duration: 60
+    duration: 60,
   });
 
   alert("Auction started successfully for ESHIM ID: " + eshimId);
-  auctionForm.reset();
+  e.target.reset();
 });
-
 
 fetchUsers();
 fetchWithdraws();
 fetchTransactions();
 fetchPurchases();
 
-setInterval(fetchWithdraws, 1500);
-setInterval(fetchTransactions, 1500);
-setInterval(fetchPurchases, 1500);
+setInterval(() => {
+  if (!isSearchingWithdraws) fetchWithdraws();
+}, 1500);
+
+setInterval(() => {
+  if (!isSearchingTransactions) fetchTransactions();
+}, 1500);
+
+setInterval(() => {
+  if (!isSearchingPurchases) fetchPurchases();
+}, 1500);

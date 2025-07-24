@@ -7,6 +7,20 @@ import {
   serverTimestamp,
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+const firebaseConfig = {
+  apiKey: "AIzaSyD0BvBkEdHI2TCt1MH4I8VFAteTUkMw_PE",
+  authDomain: "eshim-coin.firebaseapp.com",
+  projectId: "eshim-coin",
+  storageBucket: "eshim-coin.firebasestorage.app",
+  messagingSenderId: "1027852914663",
+  appId: "1:1027852914663:web:9381d871eedca60896f742",
+  measurementId: "G-M1K1X7QVTS",
+};
+const app = initializeApp(firebaseConfig);
+window.db = getFirestore(app);
+
 const db = window.db;
 
 const userList = document.querySelector(".admin-users");
@@ -28,6 +42,7 @@ const modalInputs = {
   telegram: document.getElementById("edit-telegram"),
   eBalance: document.getElementById("edit-balance"),
   status: document.getElementById("edit-status"),
+  badge: document.getElementById("edit-badge")
 };
 
 let allUsers = [];
@@ -65,6 +80,7 @@ function openUserModal(user) {
   modalInputs.telegram.value = user.telegram || "";
   modalInputs.eBalance.value = user.eBalance || 0;
   modalInputs.status.value = user.status || "";
+  modalInputs.badge.value = user.badge || "N/A"
   modal.style.display = "flex";
 }
 
@@ -96,20 +112,28 @@ function renderAdminWithdraws(withdraws, limit = true) {
       <div><b>Status:</b> ${w.status}</div>
       <div><b>Date:</b> ${w.date}</div>
       <div><b>wId:</b> ${w.wId}</div>
-      ${w.status === "pending" ? `
+      ${
+        w.status === "pending"
+          ? `
         <button data-id="${w.id}" class="approve">✅ Approve</button>
         <button data-id="${w.id}" class="deny">❌ Deny</button>
-      ` : ""}
+      `
+          : ""
+      }
     `;
     adminList.appendChild(li);
   });
 
-  document.querySelectorAll(".approve").forEach(
-    (btn) => (btn.onclick = () => updateWithdraw(btn.dataset.id, "approved"))
-  );
-  document.querySelectorAll(".deny").forEach(
-    (btn) => (btn.onclick = () => updateWithdraw(btn.dataset.id, "denied"))
-  );
+  document
+    .querySelectorAll(".approve")
+    .forEach(
+      (btn) => (btn.onclick = () => updateWithdraw(btn.dataset.id, "approved"))
+    );
+  document
+    .querySelectorAll(".deny")
+    .forEach(
+      (btn) => (btn.onclick = () => updateWithdraw(btn.dataset.id, "denied"))
+    );
 }
 
 function renderTransactions(list) {
@@ -149,20 +173,28 @@ function renderPurchases(purchases, limit = true) {
       <b>Price:</b> ${p.price?.toLocaleString()} UZS<br/>
       <b>Status:</b> ${p.status}<br/>
       <b>Date:</b> ${new Date(p.createdAt).toLocaleString()}<br/>
-      ${p.status === "waiting" ? `
+      ${
+        p.status === "waiting"
+          ? `
         <button class="approve" data-id="${p.id}">✅ Approve</button>
         <button class="deny" data-id="${p.id}">❌ Deny</button>
-      ` : ""}
+      `
+          : ""
+      }
     `;
     purchaseList.appendChild(li);
   });
 
-  document.querySelectorAll(".admin-purchases .approve").forEach(
-    (btn) => (btn.onclick = () => updatePurchase(btn.dataset.id, "approved"))
-  );
-  document.querySelectorAll(".admin-purchases .deny").forEach(
-    (btn) => (btn.onclick = () => updatePurchase(btn.dataset.id, "denied"))
-  );
+  document
+    .querySelectorAll(".admin-purchases .approve")
+    .forEach(
+      (btn) => (btn.onclick = () => updatePurchase(btn.dataset.id, "approved"))
+    );
+  document
+    .querySelectorAll(".admin-purchases .deny")
+    .forEach(
+      (btn) => (btn.onclick = () => updatePurchase(btn.dataset.id, "denied"))
+    );
 }
 
 searchUserInput.oninput = () => {
@@ -193,11 +225,12 @@ searchTransactionInput.oninput = () => {
   if (!query) {
     renderTransactions(allTransactions.slice(-15).reverse());
   } else {
-    const filtered = allTransactions.filter((tx) =>
-      tx.trId?.toLowerCase().includes(query) ||
-      tx.host?.name?.toLowerCase().includes(query) ||
-      tx.guest?.name?.toLowerCase().includes(query) ||
-      new Date(tx.date).toLocaleString().toLowerCase().includes(query)
+    const filtered = allTransactions.filter(
+      (tx) =>
+        tx.trId?.toLowerCase().includes(query) ||
+        tx.host?.name?.toLowerCase().includes(query) ||
+        tx.guest?.name?.toLowerCase().includes(query) ||
+        new Date(tx.date).toLocaleString().toLowerCase().includes(query)
     );
     renderTransactions(filtered);
   }
@@ -209,10 +242,11 @@ searchPurchaseInput.oninput = () => {
   if (!query) {
     renderPurchases(allPurchases, true);
   } else {
-    const filtered = allPurchases.filter((p) =>
-      p.accID?.toLowerCase().includes(query) ||
-      p.status?.toLowerCase().includes(query) ||
-      new Date(p.createdAt).toLocaleString().toLowerCase().includes(query)
+    const filtered = allPurchases.filter(
+      (p) =>
+        p.accID?.toLowerCase().includes(query) ||
+        p.status?.toLowerCase().includes(query) ||
+        new Date(p.createdAt).toLocaleString().toLowerCase().includes(query)
     );
     renderPurchases(filtered, false);
   }
@@ -254,7 +288,8 @@ async function fetchWithdraws() {
 async function fetchTransactions() {
   const snapshot = await getDocs(collection(db, "transactions"));
   allTransactions = snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() }));
-  if (!isSearchingTransactions) renderTransactions(allTransactions.slice(-15).reverse());
+  if (!isSearchingTransactions)
+    renderTransactions(allTransactions.slice(-15).reverse());
 }
 
 async function fetchPurchases() {
@@ -280,8 +315,11 @@ async function updatePurchase(id, status) {
       const { accID, amount } = purchase;
       const user = allUsers.find((u) => u.accID === accID);
       if (user) {
-        const updatedBalance = (parseFloat(user.eBalance) || 0) + (parseFloat(amount) || 0);
-        await updateDoc(doc(db, "users", user.id), { eBalance: updatedBalance });
+        const updatedBalance =
+          (parseFloat(user.eBalance) || 0) + (parseFloat(amount) || 0);
+        await updateDoc(doc(db, "users", user.id), {
+          eBalance: updatedBalance,
+        });
       }
     }
   }

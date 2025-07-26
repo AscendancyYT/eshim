@@ -1,12 +1,14 @@
 body {
   margin: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
   background-color: #0d1110;
   color: #ffffff;
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 100vh;
+  padding-left: 30px;
+  padding-right: 30px;
 }
 
 .profile-container {
@@ -84,7 +86,9 @@ body {
   color: #0d1110;
 }
 
-.transaction-button, .withdraw, .quitBtn{
+.transaction-button,
+.withdraw,
+.quitBtn {
   margin-top: 1rem;
   width: 100%;
   padding: 0.75rem;
@@ -101,12 +105,13 @@ body {
   justify-content: center;
 }
 
-.transaction-button:hover, .withdraw:hover{
+.transaction-button:hover,
+.withdraw:hover {
   background-color: #00ff9c;
   color: #0d1110;
 }
 
-.quitBtn:hover{
+.quitBtn:hover {
   background-color: orangered;
   border: none;
   color: #fff;
@@ -118,7 +123,7 @@ body {
   }
 }
 
-.icon-nobg{
+.icon-nobg {
   width: 20px;
   height: 20px;
   display: flex;
@@ -129,44 +134,56 @@ body {
   left: 70px;
 }
 
-.buyBtn{
+.buyBtn {
   width: 100%;
   height: 50px;
   border-radius: 10px;
   border: 1px solid #00ff9c;
   background-color: transparent;
-  color: #00ff9c; 
+  color: #00ff9c;
   position: relative;
   top: 5px;
   cursor: pointer;
-  transition: all .2s linear;
+  transition: all 0.2s linear;
   font-size: 1rem;
   font-weight: 600;
 }
 
-.buyBtn:hover{
+.buyBtn:hover {
   border: none;
   background-color: #00ff9c;
-  color: #000
+  color: #000;
 }
 
-.auctionBtn{
+.auctionBtn {
   width: 100%;
   height: 50px;
   border-radius: 10px;
   border: 1px solid #00ff9c;
   background-color: transparent;
-  color: #00ff9c; 
+  color: #00ff9c;
   position: relative;
   top: 10px;
   cursor: pointer;
-  transition: all .2s linear;
+  transition: all 0.2s linear;
   font-size: 1rem;
   font-weight: 600;
 }
 
-.auctionBtn:hover{
+.auctionBtn:hover {
   border: none;
   background-color: #00ff9c;
-  color: #000
+  color: #000;
+}
+
+.badge {
+  padding: 3px 8px;
+  border-radius: 12px;
+  margin-left: 10px;
+  font-size: 0.75rem;
+  font-weight: bold;
+  color: white;
+  background-color: gray;
+  vertical-align: middle;
+  display: none;
 }

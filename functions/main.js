@@ -1,13 +1,11 @@
-import {
-  initializeApp
-} from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
 import {
   getFirestore,
   collection,
   addDoc,
   getDocs,
   query,
-  where
+  where,
 } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-firestore.js";
 
 const firebaseConfig = {
@@ -34,7 +32,6 @@ if (localStorage.getItem("telegram")) {
   const form = document.querySelector(".form");
   const loginLink = document.querySelector(".loginLink");
   const nameLabel = document.querySelector(".nameLabel");
-  const xBtn = document.querySelector(".x-btn");
   const successAlert = document.querySelector(".success-alert");
 
   const characters = "ABCDEFGHIJKLMNOPQRSTUVWXYZ01234567891234567890";
@@ -60,35 +57,38 @@ if (localStorage.getItem("telegram")) {
     loginBtn.textContent = "Log In";
     document.querySelector(".buttons").appendChild(loginBtn);
 
-    form.addEventListener("submit", async (e) => {
-      e.preventDefault();
+    form.addEventListener(
+      "submit",
+      async (e) => {
+        e.preventDefault();
 
-      const tg = telegramInput.value.trim();
-      const pw = passwordInput.value;
+        const tg = telegramInput.value.trim();
+        const pw = passwordInput.value;
 
-      const q = query(usersRef, where("telegram", "==", tg));
-      const querySnapshot = await getDocs(q);
+        const q = query(usersRef, where("telegram", "==", tg));
+        const querySnapshot = await getDocs(q);
 
-      let foundUser = null;
-      querySnapshot.forEach((doc) => {
-        const user = doc.data();
-        if (user.password === pw) {
-          foundUser = user;
+        let foundUser = null;
+        querySnapshot.forEach((doc) => {
+          const user = doc.data();
+          if (user.password === pw) {
+            foundUser = user;
+          }
+        });
+
+        if (!foundUser) {
+          alert("Incorrect telegram or password");
+          return;
         }
-      });
 
-      if (!foundUser) {
-        alert("Incorrect telegram or password");
-        return;
-      }
+        localStorage.setItem("telegram", foundUser.telegram);
+        localStorage.setItem("accID", foundUser.accID);
+        localStorage.setItem("goodTG", true);
 
-      // ✅ Save user to localStorage
-      localStorage.setItem("telegram", foundUser.telegram);
-      localStorage.setItem("accID", foundUser.accID); // ✅ Needed for auction
-      localStorage.setItem("goodTG", true);
-
-      window.location.href = "../src/profile.html";
-    }, { once: true });
+        window.location.href = "../src/profile.html";
+      },
+      { once: true }
+    );
   });
 
   form.addEventListener("submit", async function (e) {
@@ -118,23 +118,20 @@ if (localStorage.getItem("telegram")) {
         telegram: tg,
       };
 
+      console.log("Registering new user:", newUser);
       await addDoc(usersRef, newUser);
 
-      // ✅ Save user to localStorage on registration too
       localStorage.setItem("telegram", newUser.telegram);
-      localStorage.setItem("accID", newUser.accID); // ✅ For auction
+      localStorage.setItem("accID", newUser.accID);
       localStorage.setItem("goodTG", true);
 
+      if (successAlert) successAlert.style.display = "flex";
+
       window.location.href = "../src/profile.html";
-      successAlert.style.display = "flex";
       form.reset();
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error during signup:", error);
       alert("Signup failed. Try again.");
     }
   });
-
-  xBtn.onclick = () => {
-    successAlert.style.display = "none";
-  };
 }
